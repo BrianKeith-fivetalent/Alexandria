@@ -1,0 +1,459 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+
+    "Description" : "Network Sandbox Setup for FiveTalent and CrimeDEX. Creates a VPC, 4 subnets, IGW, Security Groups, and related resources",
+
+
+    "Mappings" : {
+        "SubnetConfig" : {
+            "VPC" : { "CIDR" : "172.30.0.0/16"}
+        }
+    },
+
+    "Resources" : {
+        "RTRSandboxVPC" : {
+            "Type" : "AWS::EC2::VPC",
+            "Properties" : {
+                "CidrBlock": { "Fn::FindInMap" : [ "SubnetConfig", "VPC", "CIDR" ]},
+                "InstanceTenancy": "default",
+                "EnableDnsSupport": "true",
+                "EnableDnsHostnames": "true",
+                "Tags": [
+                    {"Key": "Name", "Value": "RTRSandboxVPC"},
+                    {"Key" : "Application", "Value": "RTR-WEB"}
+                ]
+            }
+        },
+
+
+        "igwRTRSandbox": {
+            "Type": "AWS::EC2::InternetGateway",
+            "Properties": {
+                "Tags": [
+                    {"Key": "Name", "Value": "igwRTRSandbox"},
+                    {"Key" : "Application", "Value": "RTR-WEB"},
+                    {"Key" : "Network", "Value" : "Public"}
+                ]
+            }
+            },
+
+        "AttachGateway" : {
+            "Type" : "AWS::EC2::VPCGatewayAttachment",
+            "Properties" : {
+                "VpcId" : { "Ref" : "RTRSandboxVPC"},
+                "InternetGatewayId" : { "Ref" : "igwRTRSandbox"}
+            }
+        },
+        "PublicSubnet01" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "VpcId" : { "Ref" : "RTRSandboxVPC"},
+                "AvailabilityZone" : {"Fn::Select" : [ "0", { "Fn::GetAZs": ""}]},
+                "CidrBlock" : "172.30.10.0/24",
+                "MapPublicIpOnLaunch": "true",
+                "Tags": [
+                    {"Key": "Name", "Value": "Public01"},
+                    {"Key" : "Application", "Value": "RTR-WEB"},
+                    {"Key" : "Network", "Value" : "Public"}
+                ]
+            }
+        },
+        "PublicSubnet02" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "VpcId" : { "Ref" : "RTRSandboxVPC"},
+                "AvailabilityZone" : {"Fn::Select" : [ "1", { "Fn::GetAZs": ""}]},
+                "CidrBlock" : "172.30.20.0/24",
+                "MapPublicIpOnLaunch": "true",
+                "Tags": [
+                    {"Key": "Name", "Value": "Public02"},
+                    {"Key" : "Application", "Value": "RTR-WEB"},
+                    {"Key" : "Network", "Value" : "Public"}
+                ]
+            }
+        },
+        "PrivateSubnet01" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "VpcId" : { "Ref" : "RTRSandboxVPC"},
+                "AvailabilityZone" : { "Fn::Select" : [ "0", { "Fn::GetAZs": ""}]},
+                "CidrBlock" : "172.30.110.0/24",
+                "MapPublicIpOnLaunch": "false",
+                "Tags": [
+                    {"Key": "Name", "Value": "Private01"},
+                    {"Key" : "Application", "Value": "RTR-WEB"},
+                    {"Key" : "Network", "Value" : "Private"}
+                ]
+            }
+        },
+        "PrivateSubnet02" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "VpcId" : { "Ref" : "RTRSandboxVPC"},
+                "AvailabilityZone" : { "Fn::Select" : [ "1", { "Fn::GetAZs": ""}]},
+                "CidrBlock" : "172.30.120.0/24",
+                "MapPublicIpOnLaunch": "false",
+                "Tags": [
+                    {"Key": "Name", "Value": "Private02"},
+                    {"Key" : "Application", "Value": "RTR-WEB"},
+                    {"Key" : "Network", "Value" : "Private"}
+                ]
+            }
+        },
+        "dcptRTRSandbox": {
+            "Type": "AWS::EC2::DHCPOptions",
+            "Properties": {
+                "DomainName": "ec2.internal",
+                "DomainNameServers": [ "AmazonProvidedDNS"],
+                "Tags": [
+                    {"Key": "Name", "Value": "dcptRTRSandbox"},
+                    {"Key" : "Application", "Value": "RTR-WEB"},
+                    {"Key" : "Network", "Value" : "Public"}
+                ]
+            }
+        },
+        "aclRTRSandboxPublic": {
+            "Type": "AWS::EC2::NetworkAcl",
+            "Properties": {
+                "VpcId": {"Ref" : "RTRSandboxVPC"},
+                "Tags": [
+                    {"Key": "Name", "Value": "aclRTRSandboxPublic"},
+                    {"Key" : "Application", "Value": "RTR-WEB"},
+                    {"Key" : "Network", "Value" : "Public"}
+                ]
+            }
+        },
+
+        "SubnetPublic01NetworkAclAssociation" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PublicSubnet01"},
+                "NetworkAclId" : { "Ref" : "aclRTRSandboxPublic"}
+            }
+        },
+        "SubnetPublic02NetworkAclAssociation" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PublicSubnet02"},
+                "NetworkAclId" : { "Ref" : "aclRTRSandboxPublic"}
+            }
+        },
+        "aclRTRSandboxPrivate": {
+            "Type": "AWS::EC2::NetworkAcl",
+            "Properties": {
+                "VpcId": {"Ref" : "RTRSandboxVPC"},
+                "Tags": [
+                    {"Key": "Name", "Value": "aclRTRSandboxPrivate"},
+                    {"Key" : "Application", "Value": "RTR-WEB"},
+                    {"Key" : "Network", "Value" : "Private"}
+                ]
+            }
+        },
+        "SubnetPrivate01NetworkAclAssociation" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PrivateSubnet01"},
+                "NetworkAclId" : { "Ref" : "aclRTRSandboxPrivate"}
+            }
+        },
+        "SubnetPrivate02NetworkAclAssociation" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PrivateSubnet02"},
+                "NetworkAclId" : { "Ref" : "aclRTRSandboxPrivate"}
+            }
+        },
+        "rtbRTRSandboxPublic": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {"Ref": "RTRSandboxVPC"},
+                "Tags": [
+                    {"Key": "Name", "Value": "rtbRTRSandboxPublic"},
+                    {"Key" : "Application", "Value": "RTR-WEB"},
+                    {"Key" : "Network", "Value" : "Public"}
+                ]
+            }
+        },
+
+        "IgwRoute" : {
+            "Type" : "AWS::EC2::Route",
+            "DependsOn" : "igwRTRSandbox",
+            "Properties" : {
+                "RouteTableId" : { "Ref" : "rtbRTRSandboxPublic"},
+                "DestinationCidrBlock" : "0.0.0.0/0",
+                "GatewayId" : { "Ref" : "igwRTRSandbox" }
+            }
+        },
+        "SubnetPublic01RouteTableAssociation" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PublicSubnet01"},
+                "RouteTableId" : { "Ref" : "rtbRTRSandboxPublic"}
+            }
+        },
+        "SubnetPublic02RouteTableAssociation" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PublicSubnet02"},
+                "RouteTableId" : { "Ref" : "rtbRTRSandboxPublic"}
+            }
+        },
+        "rtbRTRSandboxPrivate": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {"Ref": "RTRSandboxVPC"},
+                "Tags": [
+                    {"Key": "Name", "Value": "rtbRTRSandboxPrivate"},
+                    {"Key" : "Application", "Value": "RTR-WEB"},
+                    {"Key" : "Network", "Value" : "Private"}
+                ]
+            }
+        },
+        "SubnetPrivate01RouteTableAssociation" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PrivateSubnet01"},
+                "RouteTableId" : { "Ref" : "rtbRTRSandboxPrivate"}
+            }
+        },
+        "SubnetPrivate02RouteTableAssociation" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PrivateSubnet02"},
+                "RouteTableId" : { "Ref" : "rtbRTRSandboxPrivate"}
+            }
+        },
+        "InboundHTTPPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPublic"},
+                "RuleNumber": "100",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "80", "To": "80"}
+            }
+        },
+        "InboundHTTPSPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPublic"},
+                "RuleNumber": "110",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "443", "To": "443"}
+            }
+        },
+        "InboundRDPPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPublic"},
+                "RuleNumber": "120",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "52.88.41.78/0",
+                "PortRange": {"From": "3389", "To": "3389"}
+            }
+        },
+        "InboundDynamicPortsPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPublic"},
+                "RuleNumber": "130",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "1024", "To": "65535"}
+            }
+        },
+        "OutboundhttpPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPublic"},
+                "RuleNumber": "100",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "80", "To": "80"}
+            }
+        },
+        "OutboundhttpsPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPublic"},
+                "RuleNumber": "110",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "443", "To": "443"}
+            }
+        },
+        "OutboundMSSqlPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPublic"},
+                "RuleNumber": "120",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "172.30.0.0/16",
+                "PortRange": {"From": "1443", "To": "1443"}
+            }
+        },
+        "OutboundEphemeralPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPublic"},
+                "RuleNumber": "140",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "32768", "To": "65535"}
+            }
+        },
+        "OutboundRDPPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPublic"},
+                "RuleNumber": "150",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "172.30.0.0/16",
+                "PortRange": {"From": "3389", "To": "3389"}
+            }
+        },
+        "InboundMSSqlDBPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "100",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "172.30.0.0/16",
+                "PortRange": {"From": "1433", "To": "1433"}
+            }
+        },
+        "InboundHttpPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "110",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "172.30.0.0/16",
+                "PortRange": {"From": "80", "To": "80"}
+            }
+        },
+        "InboundHttpsPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "120",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "172.30.0.0/16",
+                "PortRange": {"From": "443", "To": "443"}
+            }
+        },
+        "InboundRDPPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "130",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "172.30.0.0/16",
+                "PortRange": {"From": "3389", "To": "3389"}
+            }
+        },
+        "InboundEphemeralPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "140",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "172.30.0.0/16",
+                "PortRange": {"From": "1024", "To": "65535"}
+            }
+        },
+        "OutboundhttpPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "100",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "80", "To": "80"}
+            }
+        },
+        "OutboundhttpsPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "110",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "443", "To": "443"}
+            }
+        },
+        "OutboundEphemeralPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "120",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "32768", "To": "65535"}
+            }
+        },
+        "OutboundMSSqlPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "130",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "172.30.0.0/16",
+                "PortRange": {"From": "1433", "To": "1433"}
+            }
+        },
+        "OutBoundRDPPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "140",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "172.30.0.0/16",
+                "PortRange": {"From": "3389", "To": "3389"}
+            }
+        }
+        
+    }
+}
+
+
+
