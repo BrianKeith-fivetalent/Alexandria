@@ -10,3 +10,5 @@ Branches will be created on a project basis hierarchy
 Branch Notes:
 1. FTS Internal - Internal Documentation Standards and Templates
 2. CrimeDEX - Setup monitoring, alerting, and reboot actions on a Debian server
+3.
+4. FTSprojWorkDocs - Internal POC Project for using TWO domains for Workdocs and setting up a one way trust between them for testing.
