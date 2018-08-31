@@ -1,0 +1,493 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+
+    "Description" : "Network Sandbox Setup for FTSprojWorkDocs Proof of Concept. Creates a 2 VPCs, 4 subnets, IGW, Security Groups, and related resources",
+
+
+    "Mappings" : {
+        "SubnetConfig" : {
+            "VPC" : { "CIDR" : "10.0.0.0/16"}
+        }
+    },
+
+    "Resources" : {
+        "VPC01FTSwd" : {
+            "Type" : "AWS::EC2::VPC",
+            "Properties" : {
+                "CidrBlock": { "Fn::FindInMap" : [ "SubnetConfig", "VPC", "CIDR" ]},
+                "InstanceTenancy": "default",
+                "EnableDnsSupport": "true",
+                "EnableDnsHostnames": "true",
+                "Tags": [
+                    {"Key": "Name", "Value": "FTSprojWorkDocsVPC1"},
+                    {"Key": "Application", "Value": "CORP"},
+                    {"key": "Project", "Value": "FTSprojWorkDocs"},
+                    {"key": "FTSArchitect", "Value": "Brian Keith"},
+                    {"key": "BornDate", "Value": "August 27, 2018"}
+
+                ]
+            }
+        },
+
+
+        "igw01FTSwd": {
+            "Type": "AWS::EC2::InternetGateway",
+            "Properties": {
+                "Tags": [
+                    {"Key": "Name", "Value": "igw01FTSwd"},
+                    {"Key": "Application", "Value": "CORP"},
+                    {"Key": "Network", "Value" : "Public"},
+                    {"key": "Project", "Value": "FTSprojWorkDocs"},
+                    {"key": "FTSArchitect", "Value": "Brian Keith"},
+                    {"key": "BornDate", "Value": "August 27, 2018"}
+                ]
+            }
+            },
+
+        "AttachGateway" : {
+            "Type" : "AWS::EC2::VPCGatewayAttachment",
+            "Properties" : {
+                "VpcId" : { "Ref" : "VPC01FTSwd"},
+                "InternetGatewayId" : { "Ref" : "igw01FTSwd"}
+            }
+        },
+        "PublicSubnet01a" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "VpcId" : { "Ref" : "VPC01FTSwd"},
+                "AvailabilityZone" : {"Fn::Select" : [ "0", { "Fn::GetAZs": ""}]},
+                "CidrBlock" : "10.0.110.0/24",
+                "MapPublicIpOnLaunch": "true",
+                "Tags": [
+                    {"Key": "Name", "Value": "Public01a"},
+                    {"Key": "Application", "Value": "CORP"},
+                    {"Key": "Network", "Value" : "Publica"},
+                    {"key": "Project", "Value": "FTSprojWorkDocs"},
+                    {"key": "FTSArchitect", "Value": "Brian Keith"},
+                    {"key": "BornDate", "Value": "August 27, 2018"}
+                ]
+            }
+        },
+        "PublicSubnet02a" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "VpcId" : { "Ref" : "VPC01FTSwd"},
+                "AvailabilityZone" : {"Fn::Select" : [ "1", { "Fn::GetAZs": ""}]},
+                "CidrBlock" : "10.0.120.0/24",
+                "MapPublicIpOnLaunch": "true",
+                "Tags": [
+                    {"Key": "Name", "Value": "Public02a"},
+                    {"Key": "Application", "Value": "CORP"},
+                    {"Key": "Network", "Value" : "Publica"},
+                    {"key": "Project", "Value": "FTSprojWorkDocs"},
+                    {"key": "FTSArchitect", "Value": "Brian Keith"},
+                    {"key": "BornDate", "Value": "August 27, 2018"}
+                ]
+            }
+        },
+        "PrivateSubnet01a" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "VpcId" : { "Ref" : "VPC01FTSwd"},
+                "AvailabilityZone" : { "Fn::Select" : [ "0", { "Fn::GetAZs": ""}]},
+                "CidrBlock" : "10.0.130.0/24",
+                "MapPublicIpOnLaunch": "false",
+                "Tags": [
+                    {"Key": "Name", "Value": "Private01a"},
+                    {"Key": "Application", "Value": "CORP"},
+                    {"Key": "Network", "Value" : "Privatea"},
+                    {"key": "Project", "Value": "FTSprojWorkDocs"},
+                    {"key": "FTSArchitect", "Value": "Brian Keith"},
+                    {"key": "BornDate", "Value": "August 27, 2018"}
+                ]
+            }
+        },
+        "PrivateSubnet02a" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "VpcId" : { "Ref" : "VPC01FTSwd"},
+                "AvailabilityZone" : { "Fn::Select" : [ "1", { "Fn::GetAZs": ""}]},
+                "CidrBlock" : "10.0.140.0/24",
+                "MapPublicIpOnLaunch": "false",
+                "Tags": [
+                    {"Key": "Name", "Value": "Private02a"},
+                    {"Key": "Application", "Value": "CORP"},
+                    {"Key": "Network", "Value" : "Privatea"},
+                    {"key": "Project", "Value": "FTSprojWorkDocs"},
+                    {"key": "FTSArchitect", "Value": "Brian Keith"},
+                    {"key": "BornDate", "Value": "August 27, 2018"}
+                ]
+            }
+        },
+        "dcpt01FTSwd": {
+            "Type": "AWS::EC2::DHCPOptions",
+            "Properties": {
+                "DomainName": "ec2.internal",
+                "DomainNameServers": [ "AmazonProvidedDNS"],
+                "Tags": [
+                    {"Key": "Name", "Value": "dcpt01FTSwd"},
+                    {"Key": "Application", "Value": "CORP"},
+                    {"Key": "Network", "Value" : "Publica"},
+                    {"key": "Project", "Value": "FTSprojWorkDocs"},
+                    {"key": "FTSArchitect", "Value": "Brian Keith"},
+                    {"key": "BornDate", "Value": "August 27, 2018"}
+                ]
+            }
+        },
+        "acl1FTSwdPublic": {
+            "Type": "AWS::EC2::NetworkAcl",
+            "Properties": {
+                "VpcId": {"Ref": "VPC01FTSwd"},
+                "Tags": [
+                    {"Key": "Name", "Value": "aclRTRSandboxPublic"},
+                    {"Key": "Application", "Value": "CORP"},
+                    {"Key": "Network", "Value" : "Publica"},
+                    {"key": "Project", "Value": "FTSprojWorkDocs"},
+                    {"key": "FTSArchitect", "Value": "Brian Keith"},
+                    {"key": "BornDate", "Value": "August 27, 2018"}
+                ]
+            }
+        },
+
+        "SubnetPublic01NetworkAclAssociation" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PublicSubnet01a"},
+                "NetworkAclId" : { "Ref" : "acl1FTSwdPublic"}
+            }
+        },
+        "SubnetPublic02NetworkAclAssociation" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PublicSubnet02a"},
+                "NetworkAclId" : { "Ref" : "acl1FTSwdPublic"}
+            }
+        },
+        "acl1FTSwdPrivate": {
+            "Type": "AWS::EC2::NetworkAcl",
+            "Properties": {
+                "VpcId": {"Ref": "VPC01FTSwd"},
+                "Tags": [
+                    {"Key": "Name", "Value": "acl1FTSwdPrivate"},
+                    {"Key": "Application", "Value": "CORP"},
+                    {"Key": "Network", "Value" : "Private"},
+                    {"key": "Project", "Value": "FTSprojWorkDocs"},
+                    {"key": "FTSArchitect", "Value": "Brian Keith"},
+                    {"key": "BornDate", "Value": "August 27, 2018"}
+                ]
+            }
+        },
+        "SubnetPrivate01NetworkAclAssociation" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PrivateSubnet01a"},
+                "NetworkAclId" : { "Ref" : "acl1FTSwdPrivate"}
+            }
+        },
+        "SubnetPrivate02NetworkAclAssociation" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PrivateSubnet02a"},
+                "NetworkAclId" : { "Ref" : "acl1FTSwdPrivate"}
+            }
+        },
+        "rtb01FTSwdPublic": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {"Ref": "VPC01FTSwd"},
+                "Tags": [
+                    {"Key": "Name", "Value": "rtb01FTSwdPublic"},
+                    {"Key": "Application", "Value": "CORP"},
+                    {"Key": "Network", "Value" : "Public"},
+                    {"key": "Project", "Value": "FTSprojWorkDocs"},
+                    {"key": "FTSArchitect", "Value": "Brian Keith"},
+                    {"key": "BornDate", "Value": "August 27, 2018"}
+                ]
+            }
+        },
+
+        "IgwRoute" : {
+            "Type" : "AWS::EC2::Route",
+            "DependsOn" : "igw01FTSwd",
+            "Properties" : {
+                "RouteTableId" : { "Ref" : "rtb01FTSwdPublic"},
+                "DestinationCidrBlock" : "0.0.0.0/0",
+                "GatewayId" : { "Ref" : "igw01FTSwd" }
+            }
+        },
+        "SubnetPublic01RouteTableAssociation" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PublicSubnet01"},
+                "RouteTableId" : { "Ref" : "rtb01FTSwdPublic"}
+            }
+        },
+        "SubnetPublic02RouteTableAssociation" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PublicSubnet02"},
+                "RouteTableId" : { "Ref" : "rtb01FTSwdPublic"}
+            }
+        },
+        "rtb01FTSwdPrivate": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {"Ref": "VPC01FTSwd"},
+                "Tags": [
+                    {"Key": "Name", "Value": "rtb01FTSwdPrivate"},
+                    {"Key" : "Application", "Value": "CORP"},
+                    {"Key" : "Network", "Value" : "Private"},
+                    {"key": "Project", "Value": "FTSprojWorkDocs"},
+                    {"key": "FTSArchitect", "Value": "Brian Keith"},
+                    {"key": "BornDate", "Value": "August 27, 2018"}
+                ]
+            }
+        },
+        "SubnetPrivate01RouteTableAssociation" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PrivateSubnet01"},
+                "RouteTableId" : { "Ref" : "rtbRTRSandboxPrivate"}
+            }
+        },
+        "SubnetPrivate02RouteTableAssociation" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PrivateSubnet02"},
+                "RouteTableId" : { "Ref" : "rtbRTRSandboxPrivate"}
+            }
+        },
+        "InboundHTTPPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPublic"},
+                "RuleNumber": "100",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "80", "To": "80"}
+            }
+        },
+        "InboundHTTPSPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPublic"},
+                "RuleNumber": "110",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "443", "To": "443"}
+            }
+        },
+        "InboundRDPPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPublic"},
+                "RuleNumber": "120",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "52.88.41.78/0",
+                "PortRange": {"From": "3389", "To": "3389"}
+            }
+        },
+        "InboundDynamicPortsPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPublic"},
+                "RuleNumber": "130",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "1024", "To": "65535"}
+            }
+        },
+        "OutboundhttpPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPublic"},
+                "RuleNumber": "100",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "80", "To": "80"}
+            }
+        },
+        "OutboundhttpsPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPublic"},
+                "RuleNumber": "110",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "443", "To": "443"}
+            }
+        },
+        "OutboundMSSqlPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPublic"},
+                "RuleNumber": "120",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "172.30.0.0/16",
+                "PortRange": {"From": "1443", "To": "1443"}
+            }
+        },
+        "OutboundEphemeralPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPublic"},
+                "RuleNumber": "140",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "32768", "To": "65535"}
+            }
+        },
+        "OutboundRDPPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPublic"},
+                "RuleNumber": "150",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "172.30.0.0/16",
+                "PortRange": {"From": "3389", "To": "3389"}
+            }
+        },
+        "InboundMSSqlDBPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "100",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "172.30.0.0/16",
+                "PortRange": {"From": "1433", "To": "1433"}
+            }
+        },
+        "InboundHttpPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "110",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "172.30.0.0/16",
+                "PortRange": {"From": "80", "To": "80"}
+            }
+        },
+        "InboundHttpsPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "120",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "172.30.0.0/16",
+                "PortRange": {"From": "443", "To": "443"}
+            }
+        },
+        "InboundRDPPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "130",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "172.30.0.0/16",
+                "PortRange": {"From": "3389", "To": "3389"}
+            }
+        },
+        "InboundEphemeralPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "140",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "172.30.0.0/16",
+                "PortRange": {"From": "1024", "To": "65535"}
+            }
+        },
+        "OutboundhttpPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "100",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "80", "To": "80"}
+            }
+        },
+        "OutboundhttpsPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "110",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "443", "To": "443"}
+            }
+        },
+        "OutboundEphemeralPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "120",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "32768", "To": "65535"}
+            }
+        },
+        "OutboundMSSqlPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "130",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "172.30.0.0/16",
+                "PortRange": {"From": "1433", "To": "1433"}
+            }
+        },
+        "OutBoundRDPPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "aclRTRSandboxPrivate"},
+                "RuleNumber": "140",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "172.30.0.0/16",
+                "PortRange": {"From": "3389", "To": "3389"}
+            }
+        }
+        
+    }
+}
+
+
+
