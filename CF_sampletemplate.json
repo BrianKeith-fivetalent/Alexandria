@@ -1,0 +1,27 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+
+    "Description" : "Network Sandbox Setup for FTSprojWorkDocs Proof of Concept. Creates a network of 2 VPCs, 6 subnets, IGWs, Security Groups, and related resources",
+
+
+    "Mappings" : {
+        "SubnetConfig" : {
+            "VPCa" : {"CIDR": "10.10.0.0/16"}
+        }
+    },
+
+    "Resources" : {
+        "VPC01FTSwd" : {
+            "Type" : "AWS::EC2::VPC",
+            "Properties" : {
+                "CidrBlock": { "Fn::FindInMap" : [ "SubnetConfig", "VPCa", "CIDR" ]},
+                "InstanceTenancy": "default",
+                "EnableDnsSupport": "true",
+                "EnableDnsHostnames": "true",
+                "Tags": [
+                    {"Key": "Name", "Value": "VPC01FTSwd"}
+                ]
+            }
+        }
+    }
+}
