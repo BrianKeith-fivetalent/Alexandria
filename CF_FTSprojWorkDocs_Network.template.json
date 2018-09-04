@@ -3,6 +3,13 @@
 
     "Description" : "Network Sandbox Setup for FTSprojWorkDocs Proof of Concept. Creates a network of 2 VPCs, 6 subnets, IGWs, Security Groups, and related resources",
 
+    "Parameters" : {
+        "tagParamFTSArchitect" : {
+          "Type" : "String",
+          "Default" : "Brian Keith",
+          "Description" : "Enter the name of the Five Talent Architect"
+        }
+      },
 
     "Mappings" : {
         "SubnetConfig" : {
@@ -21,7 +28,8 @@
                 "EnableDnsHostnames": "true",
                 "Tags": [
                     {"Key": "Name", "Value": "VPC01FTSwd"},
-                    {"Key": "Application", "Value": "CORP"}
+                    {"Key": "Application", "Value": "CORP"},
+                    {"Key": "Name", "Value":  { "Ref" : "tagParamFTSArchitect" }}
 
                 ]
             }
@@ -93,7 +101,7 @@
             "Properties" : {
                 "VpcId" : { "Ref" : "VPC01FTSwd"},
                 "AvailabilityZone" : { "Fn::Select" : [ "1", { "Fn::GetAZs": ""}]},
-                "CidrBlock" : "10.0.120.0/24",
+                "CidrBlock" : "10.10.120.0/24",
                 "MapPublicIpOnLaunch": "false",
                 "Tags": [
                     {"Key": "Name", "Value": "PrivateSubnet02a"},
@@ -121,10 +129,7 @@
                 "Tags": [
                     {"Key": "Name", "Value": "acl1FTSwdPublic"},
                     {"Key": "Application", "Value": "CORP"},
-                    {"Key": "Network", "Value" : "Publica"},
-                    {"key": "Project", "Value": "FTSprojWorkDocs"},
-                    {"key": "FTSArchitect", "Value": "Brian Keith"},
-                    {"key": "BornDate", "Value": "August 31 2018"}
+                    {"Key": "Network", "Value" : "Publica"}
                 ]
             }
         },
@@ -150,10 +155,7 @@
                 "Tags": [
                     {"Key": "Name", "Value": "acl1FTSwdPrivate"},
                     {"Key": "Application", "Value": "CORP"},
-                    {"Key": "Network", "Value" : "Private"},
-                    {"key": "Project", "Value": "FTSprojWorkDocs"},
-                    {"key": "FTSArchitect", "Value": "Brian Keith"},
-                    {"key": "BornDate", "Value": "August 31 2018"}
+                    {"Key": "Network", "Value" : "Private"}
                 ]
             }
         },
@@ -178,10 +180,7 @@
                 "Tags": [
                     {"Key": "Name", "Value": "rtb01FTSwdPublic"},
                     {"Key": "Application", "Value": "CORP"},
-                    {"Key": "Network", "Value" : "Public"},
-                    {"key": "Project", "Value": "FTSprojWorkDocs"},
-                    {"key": "FTSArchitect", "Value": "Brian Keith"},
-                    {"key": "BornDate", "Value": "August 31 2018"}
+                    {"Key": "Network", "Value" : "Public"}
                 ]
             }
         },
@@ -216,10 +215,7 @@
                 "Tags": [
                     {"Key": "Name", "Value": "rtb01FTSwdPrivate"},
                     {"Key" : "Application", "Value": "CORP"},
-                    {"Key" : "Network", "Value" : "Private"},
-                    {"key": "Project", "Value": "FTSprojWorkDocs"},
-                    {"key": "FTSArchitect", "Value": "Brian Keith"},
-                    {"key": "BornDate", "Value": "August 31 2018"}
+                    {"Key" : "Network", "Value" : "Private"}
                 ]
             }
         },
@@ -349,7 +345,7 @@
             "Type": "AWS::EC2::NetworkAclEntry",
             "Properties": {
                 "NetworkAclId": {"Ref": "acl1FTSwdPublic"},
-                "RuleNumber": "100",
+                "RuleNumber": "101",
                 "Protocol": "6",
                 "RuleAction": "allow",
                 "Egress": "false",
@@ -464,25 +460,7 @@
                 "CidrBlock": "172.30.0.0/16",
                 "PortRange": {"From": "3389", "To": "3389"}
             }
-        },
-        "VPC02FTSwd" : {
-            "Type" : "AWS::EC2::VPC",
-            "Properties" : {
-                "CidrBlock": { "Fn::FindInMap" : [ "SubnetConfig", "VPCb", "CIDR" ]},
-                "InstanceTenancy": "default",
-                "EnableDnsSupport": "true",
-                "EnableDnsHostnames": "true",
-                "Tags": [
-                    {"Key": "Name", "Value": "FTSprojWorkDocsVPC1"},
-                    {"Key": "Application", "Value": "CLIENT"},
-                    {"key": "Project", "Value": "FTSprojWorkDocs"},
-                    {"key": "FTSArchitect", "Value": "Brian Keith"},
-                    {"key": "BornDate", "Value": "August 31 2018"}
-
-                ]
-            }
         }
-        
     }
 }
 
