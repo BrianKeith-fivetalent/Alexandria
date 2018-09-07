@@ -1,0 +1,59 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "This template creates basic security groups to be used with a Windows Domain Controller.use this instance's private IP as the DNS server.",
+  
+  "Parameters": {
+    "SourceCidrForRDP" : {
+        "Description" : "IP Cidr from which you are likely to RDP into the instances. You can add rules later by modifying the created security groups e.g. 54.32.98.160/32",
+        "Type" : "String",
+        "MinLength" : "9",
+        "MaxLength" : "18",
+        "AllowedPattern" : "^([0-9]+\\.){3}[0-9]+\\/[0-9]+$"
+        }
+    },
+
+
+
+  "Resources": {
+        "DomainControllerSecurityGroup" : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "Properties" : {
+            "GroupDescription" : "Domain Controller",
+            "SecurityGroupIngress" : [
+                {"IpProtocol" : "udp", "FromPort" : "123", "ToPort" : "123", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                {"IpProtocol" : "tcp", "FromPort" : "135", "ToPort" : "135", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                {"IpProtocol" : "udp", "FromPort" : "138", "ToPort" : "138", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                {"IpProtocol" : "tcp", "FromPort" : "1024", "ToPort" : "65535", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                {"IpProtocol" : "tcp", "FromPort" : "389", "ToPort" : "389", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                {"IpProtocol" : "udp", "FromPort" : "389", "ToPort" : "389", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                {"IpProtocol" : "tcp", "FromPort" : "636", "ToPort" : "636", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                {"IpProtocol" : "tcp", "FromPort" : "3268", "ToPort" : "3268", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                {"IpProtocol" : "tcp", "FromPort" : "3269", "ToPort" : "3269", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                {"IpProtocol" : "tcp", "FromPort" : "53", "ToPort" : "53", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                {"IpProtocol" : "udp", "FromPort" : "53", "ToPort" : "53", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                {"IpProtocol" : "tcp", "FromPort" : "88", "ToPort" : "88", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                {"IpProtocol" : "udp", "FromPort" : "88", "ToPort" : "88", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                {"IpProtocol" : "tcp", "FromPort" : "445", "ToPort" : "445", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                {"IpProtocol" : "udp", "FromPort" : "445", "ToPort" : "445", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                {"IpProtocol" : "udp", "FromPort" : "135", "ToPort" : "135", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                {"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : { "Ref" : "SourceCidrForRDP" }},
+                {"IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" }}
+            ]
+            }      
+        },
+        "DomainMemberSecurityGroup" : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "Properties" : {
+              "GroupDescription" : "Domain Members",
+              "SecurityGroupIngress" : [
+              ]
+            }      
+          },   
+          
+          "DomainMemberSecurityGroupIngress1" : {
+            "Type" : "AWS::EC2::SecurityGroupIngress",
+            "Properties" : { "GroupName" : { "Ref" : "DomainMemberSecurityGroup" }, "IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : { "Ref" : "SourceCidrForRDP" } }
+          }    
+    } 
+}
