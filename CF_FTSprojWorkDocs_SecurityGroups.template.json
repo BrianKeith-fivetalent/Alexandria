@@ -19,33 +19,35 @@
         "DomainControllerSecurityGroup" : {
             "Type" : "AWS::EC2::SecurityGroup",
             "Properties" : {
-            "GroupDescription" : "Domain Controller",
-            "SecurityGroupIngress" : [
-                {"IpProtocol" : "udp", "FromPort" : "123", "ToPort" : "123", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
-                {"IpProtocol" : "tcp", "FromPort" : "135", "ToPort" : "135", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
-                {"IpProtocol" : "udp", "FromPort" : "138", "ToPort" : "138", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
-                {"IpProtocol" : "tcp", "FromPort" : "1024", "ToPort" : "65535", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
-                {"IpProtocol" : "tcp", "FromPort" : "389", "ToPort" : "389", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
-                {"IpProtocol" : "udp", "FromPort" : "389", "ToPort" : "389", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
-                {"IpProtocol" : "tcp", "FromPort" : "636", "ToPort" : "636", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
-                {"IpProtocol" : "tcp", "FromPort" : "3268", "ToPort" : "3268", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
-                {"IpProtocol" : "tcp", "FromPort" : "3269", "ToPort" : "3269", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
-                {"IpProtocol" : "tcp", "FromPort" : "53", "ToPort" : "53", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
-                {"IpProtocol" : "udp", "FromPort" : "53", "ToPort" : "53", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
-                {"IpProtocol" : "tcp", "FromPort" : "88", "ToPort" : "88", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
-                {"IpProtocol" : "udp", "FromPort" : "88", "ToPort" : "88", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
-                {"IpProtocol" : "tcp", "FromPort" : "445", "ToPort" : "445", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
-                {"IpProtocol" : "udp", "FromPort" : "445", "ToPort" : "445", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
-                {"IpProtocol" : "udp", "FromPort" : "135", "ToPort" : "135", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
-                {"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : { "Ref" : "SourceCidrForRDP" }},
-                {"IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" }}
-            ]
+                "GroupDescription" : "Domain Controller",
+                "VpcId": "vpc-00ac7b31e72af4f75", 
+                "SecurityGroupIngress" : [
+                    {"IpProtocol" : "udp", "FromPort" : "123", "ToPort" : "123", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                    {"IpProtocol" : "tcp", "FromPort" : "135", "ToPort" : "135", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                    {"IpProtocol" : "udp", "FromPort" : "138", "ToPort" : "138", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                    {"IpProtocol" : "tcp", "FromPort" : "1024", "ToPort" : "65535", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                    {"IpProtocol" : "tcp", "FromPort" : "389", "ToPort" : "389", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                    {"IpProtocol" : "udp", "FromPort" : "389", "ToPort" : "389", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                    {"IpProtocol" : "tcp", "FromPort" : "636", "ToPort" : "636", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                    {"IpProtocol" : "tcp", "FromPort" : "3268", "ToPort" : "3268", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                    {"IpProtocol" : "tcp", "FromPort" : "3269", "ToPort" : "3269", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                    {"IpProtocol" : "tcp", "FromPort" : "53", "ToPort" : "53", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                    {"IpProtocol" : "udp", "FromPort" : "53", "ToPort" : "53", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                    {"IpProtocol" : "tcp", "FromPort" : "88", "ToPort" : "88", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                    {"IpProtocol" : "udp", "FromPort" : "88", "ToPort" : "88", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                    {"IpProtocol" : "tcp", "FromPort" : "445", "ToPort" : "445", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                    {"IpProtocol" : "udp", "FromPort" : "445", "ToPort" : "445", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                    {"IpProtocol" : "udp", "FromPort" : "135", "ToPort" : "135", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" } },
+                    {"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : { "Ref" : "SourceCidrForRDP" }},
+                    {"IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "SourceSecurityGroupName" : { "Ref" : "DomainMemberSecurityGroup" }}
+                ]
             }      
         },
         "DomainMemberSecurityGroup" : {
             "Type" : "AWS::EC2::SecurityGroup",
             "Properties" : {
               "GroupDescription" : "Domain Members",
+              "VpcId": "vpc-00ac7b31e72af4f75",
               "SecurityGroupIngress" : [
               ]
             }      
