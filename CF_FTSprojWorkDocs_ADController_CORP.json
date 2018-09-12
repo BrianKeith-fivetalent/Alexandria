@@ -19,13 +19,6 @@
       "ConstraintDescription" : "must be a valid EC2 instance type."
     },
 
-    "DomainControllerSecurityGroup": {
-      "Description": "Amazon EC2 VPC Security Group",
-      "Type": "AWS::EC2::SecurityGroup",
-      "Default": "sg-09e0f8369bd0d5d02",
-      "ConstraintDescription": "must be the name of an existing EC2 security group"
-    },
-
     "DomainDNSName" : {
       "Description" : "Fully qualified domain name (FQDN) of the forest root domain e.g. corp.example.com",
       "Type" : "String",
@@ -150,7 +143,7 @@
         "ImageId" : { "Fn::FindInMap" : [ "AWSRegion2AMI", { "Ref" : "AWS::Region" }, "Windows2016" ]},
         "InstanceType" : { "Ref" : "InstanceType" },
         "KeyName" : { "Ref" : "KeyName" },
-        "SecurityGroupIds": {"Ref": "DomainControllerSecurityGroup"},
+        "SecurityGroupIds": ["sg-09a8143d079bf80a4"],
         "SubnetId" : "subnet-0b7f7d518d1ec9a29",
         "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
             "<script>\n",

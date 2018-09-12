@@ -1,0 +1,58 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "This template creates basic empty security groups to be used with a Windows Domain Controller. Add the rules manually",
+  
+  "Parameters": {
+    "SourceCidrForRDP" : {
+        "Description" : "IP Cidr from which you are likely to RDP into the instances. You can add rules later by modifying the created security groups e.g. 54.32.98.160/32",
+        "Type" : "String",
+        "MinLength" : "9",
+        "MaxLength" : "18",
+        "AllowedPattern" : "^([0-9]+\\.){3}[0-9]+\\/[0-9]+$"
+        }
+    },
+
+
+
+  "Resources": {
+        "DomainControllerSecurityGroup" : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "DependsOn": "DomainMemberSecurityGroup",
+            "Properties" : {
+                "GroupDescription" : "Domain Controller",
+                "VpcId": "vpc-00ac7b31e72af4f75", 
+                "SecurityGroupIngress" : [
+                ]
+            }      
+        },
+        "DomainMemberSecurityGroup" : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "Properties" : {
+              "GroupDescription" : "Domain Members",
+              "VpcId": "vpc-00ac7b31e72af4f75",
+              "SecurityGroupIngress" : [
+              ]
+            }      
+          }, 
+          "DomainControllerClientSecurityGroup" : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "DependsOn": "DomainMemberClientSecurityGroup",
+            "Properties" : {
+                "GroupDescription" : "Client Domain Controller",
+                "VpcId": "vpc-0d417b4706bc195a8", 
+                "SecurityGroupIngress" : [
+                ]
+            }      
+        },
+        "DomainMemberClientSecurityGroup" : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "Properties" : {
+              "GroupDescription" : "Client Domain Members",
+              "VpcId": "vpc-0d417b4706bc195a8",
+              "SecurityGroupIngress" : [
+              ]
+            }      
+          }  
+    } 
+}

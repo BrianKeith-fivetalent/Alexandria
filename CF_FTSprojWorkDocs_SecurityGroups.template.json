@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
 
-  "Description" : "This template creates basic security groups to be used with a Windows Domain Controller.use this instance's private IP as the DNS server.",
+  "Description" : "This template creates basic security groups to be used with a Windows Domain Controller.",
   
   "Parameters": {
     "SourceCidrForRDP" : {
@@ -18,6 +18,7 @@
   "Resources": {
         "DomainControllerSecurityGroup" : {
             "Type" : "AWS::EC2::SecurityGroup",
+            "DependsOn": "DomainMemberSecurityGroup",
             "Properties" : {
                 "GroupDescription" : "Domain Controller",
                 "VpcId": "vpc-00ac7b31e72af4f75", 
@@ -51,11 +52,6 @@
               "SecurityGroupIngress" : [
               ]
             }      
-          },   
-          
-          "DomainMemberSecurityGroupIngress1" : {
-            "Type" : "AWS::EC2::SecurityGroupIngress",
-            "Properties" : { "GroupName" : { "Ref" : "DomainMemberSecurityGroup" }, "IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : { "Ref" : "SourceCidrForRDP" } }
-          }    
+          }   
     } 
 }
