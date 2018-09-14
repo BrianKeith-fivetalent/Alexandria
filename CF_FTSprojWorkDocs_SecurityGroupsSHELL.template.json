@@ -13,8 +13,6 @@
         }
     },
 
-
-
   "Resources": {
         "DomainControllerSecurityGroup" : {
             "Type" : "AWS::EC2::SecurityGroup",
