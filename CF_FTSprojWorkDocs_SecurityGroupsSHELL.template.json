@@ -21,6 +21,24 @@
                 "GroupDescription" : "Domain Controller",
                 "VpcId": "vpc-00ac7b31e72af4f75", 
                 "SecurityGroupIngress" : [
+                    {"IpProtocol" : "udp", "FromPort" : "123", "ToPort" : "123", "SourceSecurityGroupId" : "sg-0c6cc63b1b98fb529"},
+                    {"IpProtocol" : "tcp", "FromPort" : "135", "ToPort" : "135", "SourceSecurityGroupId" : "sg-0c6cc63b1b98fb529"},
+                    {"IpProtocol" : "udp", "FromPort" : "138", "ToPort" : "138", "SourceSecurityGroupId" : "sg-0c6cc63b1b98fb529"},
+                    {"IpProtocol" : "tcp", "FromPort" : "1024", "ToPort" : "65535", "SourceSecurityGroupId" : "sg-0c6cc63b1b98fb529"},
+                    {"IpProtocol" : "tcp", "FromPort" : "389", "ToPort" : "389", "SourceSecurityGroupId" : "sg-0c6cc63b1b98fb529"},
+                    {"IpProtocol" : "udp", "FromPort" : "389", "ToPort" : "389", "SourceSecurityGroupId" : "sg-0c6cc63b1b98fb529"},
+                    {"IpProtocol" : "tcp", "FromPort" : "636", "ToPort" : "636", "SourceSecurityGroupId" : "sg-0c6cc63b1b98fb529"},
+                    {"IpProtocol" : "tcp", "FromPort" : "3268", "ToPort" : "3268", "SourceSecurityGroupId" : "sg-0c6cc63b1b98fb529"},
+                    {"IpProtocol" : "tcp", "FromPort" : "3269", "ToPort" : "3269", "SourceSecurityGroupId" : "sg-0c6cc63b1b98fb529"},
+                    {"IpProtocol" : "tcp", "FromPort" : "53", "ToPort" : "53", "SourceSecurityGroupId" : "sg-0c6cc63b1b98fb529"},
+                    {"IpProtocol" : "udp", "FromPort" : "53", "ToPort" : "53", "SourceSecurityGroupId" : "sg-0c6cc63b1b98fb529"},
+                    {"IpProtocol" : "tcp", "FromPort" : "88", "ToPort" : "88", "SourceSecurityGroupId" : "sg-0c6cc63b1b98fb529"},
+                    {"IpProtocol" : "udp", "FromPort" : "88", "ToPort" : "88", "SourceSecurityGroupId" : "sg-0c6cc63b1b98fb529"},
+                    {"IpProtocol" : "tcp", "FromPort" : "445", "ToPort" : "445", "SourceSecurityGroupId" : "sg-0c6cc63b1b98fb529"},
+                    {"IpProtocol" : "udp", "FromPort" : "445", "ToPort" : "445", "SourceSecurityGroupId" : "sg-0c6cc63b1b98fb529"},
+                    {"IpProtocol" : "udp", "FromPort" : "135", "ToPort" : "135", "SourceSecurityGroupId" : "sg-0c6cc63b1b98fb529"},
+                    {"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : { "Ref" : "SourceCidrForRDP" }},
+                    {"IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "SourceSecurityGroupId" : "sg-0c6cc63b1b98fb529"}
                 ]
             }      
         },
@@ -30,9 +48,12 @@
               "GroupDescription" : "Domain Members",
               "VpcId": "vpc-00ac7b31e72af4f75",
               "SecurityGroupIngress" : [
+                {"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : { "Ref" : "SourceCidrForRDP" }}
               ]
             }      
           }, 
+
+
           "DomainControllerClientSecurityGroup" : {
             "Type" : "AWS::EC2::SecurityGroup",
             "DependsOn": "DomainMemberClientSecurityGroup",
@@ -40,6 +61,24 @@
                 "GroupDescription" : "Client Domain Controller",
                 "VpcId": "vpc-0d417b4706bc195a8", 
                 "SecurityGroupIngress" : [
+                    {"IpProtocol" : "udp", "FromPort" : "123", "ToPort" : "123", "SourceSecurityGroupId" : "sg-053cfa7a46198d6b7"},
+                    {"IpProtocol" : "tcp", "FromPort" : "135", "ToPort" : "135", "SourceSecurityGroupId" : "sg-053cfa7a46198d6b7"},
+                    {"IpProtocol" : "udp", "FromPort" : "138", "ToPort" : "138", "SourceSecurityGroupId" : "sg-053cfa7a46198d6b7"},
+                    {"IpProtocol" : "tcp", "FromPort" : "1024", "ToPort" : "65535", "SourceSecurityGroupId" : "sg-053cfa7a46198d6b7"},
+                    {"IpProtocol" : "tcp", "FromPort" : "389", "ToPort" : "389", "SourceSecurityGroupId" : "sg-053cfa7a46198d6b7"},
+                    {"IpProtocol" : "udp", "FromPort" : "389", "ToPort" : "389", "SourceSecurityGroupId" : "sg-053cfa7a46198d6b7"},
+                    {"IpProtocol" : "tcp", "FromPort" : "636", "ToPort" : "636", "SourceSecurityGroupId" : "sg-053cfa7a46198d6b7"},
+                    {"IpProtocol" : "tcp", "FromPort" : "3268", "ToPort" : "3268", "SourceSecurityGroupId" : "sg-053cfa7a46198d6b7"},
+                    {"IpProtocol" : "tcp", "FromPort" : "3269", "ToPort" : "3269", "SourceSecurityGroupId" : "sg-053cfa7a46198d6b7"},
+                    {"IpProtocol" : "tcp", "FromPort" : "53", "ToPort" : "53", "SourceSecurityGroupId" : "sg-053cfa7a46198d6b7"},
+                    {"IpProtocol" : "udp", "FromPort" : "53", "ToPort" : "53", "SourceSecurityGroupId" : "sg-053cfa7a46198d6b7"},
+                    {"IpProtocol" : "tcp", "FromPort" : "88", "ToPort" : "88", "SourceSecurityGroupId" : "sg-053cfa7a46198d6b7"},
+                    {"IpProtocol" : "udp", "FromPort" : "88", "ToPort" : "88", "SourceSecurityGroupId" : "sg-053cfa7a46198d6b7"},
+                    {"IpProtocol" : "tcp", "FromPort" : "445", "ToPort" : "445", "SourceSecurityGroupId" : "sg-053cfa7a46198d6b7"},
+                    {"IpProtocol" : "udp", "FromPort" : "445", "ToPort" : "445", "SourceSecurityGroupId" : "sg-053cfa7a46198d6b7"},
+                    {"IpProtocol" : "udp", "FromPort" : "135", "ToPort" : "135", "SourceSecurityGroupId" : "sg-053cfa7a46198d6b7"},
+                    {"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : { "Ref" : "SourceCidrForRDP" }},
+                    {"IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "SourceSecurityGroupId" : "sg-053cfa7a46198d6b7"}
                 ]
             }      
         },
@@ -49,6 +88,7 @@
               "GroupDescription" : "Client Domain Members",
               "VpcId": "vpc-0d417b4706bc195a8",
               "SecurityGroupIngress" : [
+                {"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : { "Ref" : "SourceCidrForRDP" }}
               ]
             }      
           }  
