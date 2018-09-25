@@ -16,7 +16,7 @@
         },
         "tagParamBornDate" : {
             "Type" : "String",
-            "Default" : "September 4th 2018",
+            "Default" : "September 24th 2018",
             "Description" : "Enter the creation date of the CF stack"
         }
       },
@@ -341,18 +341,6 @@
                 "PortRange": {"From": "443", "To": "443"}
             }
         },
-        "OutboundMSSqlPublicNetworkAclEntry": {
-            "Type": "AWS::EC2::NetworkAclEntry",
-            "Properties": {
-                "NetworkAclId": {"Ref": "acl1FTSwdPublic"},
-                "RuleNumber": "120",
-                "Protocol": "6",
-                "RuleAction": "allow",
-                "Egress": "true",
-                "CidrBlock": "172.30.0.0/16",
-                "PortRange": {"From": "1443", "To": "1443"}
-            }
-        },
         "OutboundEphemeralPublicNetworkAclEntry": {
             "Type": "AWS::EC2::NetworkAclEntry",
             "Properties": {
@@ -373,20 +361,8 @@
                 "Protocol": "6",
                 "RuleAction": "allow",
                 "Egress": "true",
-                "CidrBlock": "172.30.0.0/16",
+                "CidrBlock": "10.10.0.0/16",
                 "PortRange": {"From": "3389", "To": "3389"}
-            }
-        },
-        "InboundMSSqlDBPrivateNetworkAclEntry": {
-            "Type": "AWS::EC2::NetworkAclEntry",
-            "Properties": {
-                "NetworkAclId": {"Ref": "acl1FTSwdPublic"},
-                "RuleNumber": "101",
-                "Protocol": "6",
-                "RuleAction": "allow",
-                "Egress": "false",
-                "CidrBlock": "172.30.0.0/16",
-                "PortRange": {"From": "1433", "To": "1433"}
             }
         },
         "InboundHttpPrivateNetworkAclEntry": {
@@ -397,7 +373,7 @@
                 "Protocol": "6",
                 "RuleAction": "allow",
                 "Egress": "false",
-                "CidrBlock": "172.30.0.0/16",
+                "CidrBlock": "10.10.0.0/16",
                 "PortRange": {"From": "80", "To": "80"}
             }
         },
@@ -409,7 +385,7 @@
                 "Protocol": "6",
                 "RuleAction": "allow",
                 "Egress": "false",
-                "CidrBlock": "172.30.0.0/16",
+                "CidrBlock": "10.10.0.0/16",
                 "PortRange": {"From": "443", "To": "443"}
             }
         },
@@ -421,7 +397,7 @@
                 "Protocol": "6",
                 "RuleAction": "allow",
                 "Egress": "false",
-                "CidrBlock": "172.30.0.0/16",
+                "CidrBlock": "10.10.0.0/16",
                 "PortRange": {"From": "3389", "To": "3389"}
             }
         },
@@ -433,7 +409,7 @@
                 "Protocol": "6",
                 "RuleAction": "allow",
                 "Egress": "false",
-                "CidrBlock": "172.30.0.0/16",
+                "CidrBlock": "10.10.0.0/16",
                 "PortRange": {"From": "1024", "To": "65535"}
             }
         },
@@ -473,18 +449,6 @@
                 "PortRange": {"From": "32768", "To": "65535"}
             }
         },
-        "OutboundMSSqlPrivateNetworkAclEntry": {
-            "Type": "AWS::EC2::NetworkAclEntry",
-            "Properties": {
-                "NetworkAclId": {"Ref": "acl1FTSwdPrivate"},
-                "RuleNumber": "130",
-                "Protocol": "6",
-                "RuleAction": "allow",
-                "Egress": "true",
-                "CidrBlock": "172.30.0.0/16",
-                "PortRange": {"From": "1433", "To": "1433"}
-            }
-        },
         "OutBoundRDPPrivateNetworkAclEntry": {
             "Type": "AWS::EC2::NetworkAclEntry",
             "Properties": {
@@ -493,7 +457,7 @@
                 "Protocol": "6",
                 "RuleAction": "allow",
                 "Egress": "true",
-                "CidrBlock": "172.30.0.0/16",
+                "CidrBlock": "10.10.0.0/16",
                 "PortRange": {"From": "3389", "To": "3389"}
             }
         },
@@ -809,18 +773,6 @@
                 "PortRange": {"From": "443", "To": "443"}
             }
         },
-        "OutboundMSSqlPublicNetworkAclEntry2": {
-            "Type": "AWS::EC2::NetworkAclEntry",
-            "Properties": {
-                "NetworkAclId": {"Ref": "acl2FTSwdPublic"},
-                "RuleNumber": "120",
-                "Protocol": "6",
-                "RuleAction": "allow",
-                "Egress": "true",
-                "CidrBlock": "172.30.0.0/16",
-                "PortRange": {"From": "1443", "To": "1443"}
-            }
-        },
         "OutboundEphemeralPublicNetworkAclEntry2": {
             "Type": "AWS::EC2::NetworkAclEntry",
             "Properties": {
@@ -841,20 +793,8 @@
                 "Protocol": "6",
                 "RuleAction": "allow",
                 "Egress": "true",
-                "CidrBlock": "172.30.0.0/16",
+                "CidrBlock": "10.20.0.0/16",
                 "PortRange": {"From": "3389", "To": "3389"}
-            }
-        },
-        "InboundMSSqlDBPrivateNetworkAclEntry2": {
-            "Type": "AWS::EC2::NetworkAclEntry",
-            "Properties": {
-                "NetworkAclId": {"Ref": "acl2FTSwdPublic"},
-                "RuleNumber": "101",
-                "Protocol": "6",
-                "RuleAction": "allow",
-                "Egress": "false",
-                "CidrBlock": "172.30.0.0/16",
-                "PortRange": {"From": "1433", "To": "1433"}
             }
         },
         "InboundHttpPrivateNetworkAclEntry2": {
@@ -865,7 +805,7 @@
                 "Protocol": "6",
                 "RuleAction": "allow",
                 "Egress": "false",
-                "CidrBlock": "172.30.0.0/16",
+                "CidrBlock": "10.20.0.0/16",
                 "PortRange": {"From": "80", "To": "80"}
             }
         },
@@ -877,7 +817,7 @@
                 "Protocol": "6",
                 "RuleAction": "allow",
                 "Egress": "false",
-                "CidrBlock": "172.30.0.0/16",
+                "CidrBlock": "10.20.0.0/16",
                 "PortRange": {"From": "443", "To": "443"}
             }
         },
@@ -889,7 +829,7 @@
                 "Protocol": "6",
                 "RuleAction": "allow",
                 "Egress": "false",
-                "CidrBlock": "172.30.0.0/16",
+                "CidrBlock": "10.20.0.0/16",
                 "PortRange": {"From": "3389", "To": "3389"}
             }
         },
@@ -901,7 +841,7 @@
                 "Protocol": "6",
                 "RuleAction": "allow",
                 "Egress": "false",
-                "CidrBlock": "172.30.0.0/16",
+                "CidrBlock": "10.20.0.0/16",
                 "PortRange": {"From": "1024", "To": "65535"}
             }
         },
@@ -941,18 +881,6 @@
                 "PortRange": {"From": "32768", "To": "65535"}
             }
         },
-        "OutboundMSSqlPrivateNetworkAclEntry2": {
-            "Type": "AWS::EC2::NetworkAclEntry",
-            "Properties": {
-                "NetworkAclId": {"Ref": "acl2FTSwdPrivate"},
-                "RuleNumber": "130",
-                "Protocol": "6",
-                "RuleAction": "allow",
-                "Egress": "true",
-                "CidrBlock": "172.30.0.0/16",
-                "PortRange": {"From": "1433", "To": "1433"}
-            }
-        },
         "OutBoundRDPPrivateNetworkAclEntry2": {
             "Type": "AWS::EC2::NetworkAclEntry",
             "Properties": {
@@ -961,7 +889,7 @@
                 "Protocol": "6",
                 "RuleAction": "allow",
                 "Egress": "true",
-                "CidrBlock": "172.30.0.0/16",
+                "CidrBlock": "10.20.0.0/16",
                 "PortRange": {"From": "3389", "To": "3389"}
             }
         }
