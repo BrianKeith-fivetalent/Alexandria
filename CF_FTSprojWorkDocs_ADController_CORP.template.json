@@ -143,8 +143,8 @@
         "ImageId" : { "Fn::FindInMap" : [ "AWSRegion2AMI", { "Ref" : "AWS::Region" }, "Windows2016" ]},
         "InstanceType" : { "Ref" : "InstanceType" },
         "KeyName" : { "Ref" : "KeyName" },
-        "SecurityGroupIds": ["sg-09a8143d079bf80a4"],
-        "SubnetId" : "subnet-0b7f7d518d1ec9a29",
+        "SecurityGroupIds": ["sg-08fd39eadd5537c24"],
+        "SubnetId" : "subnet-0ad0db0f8cdc2b936",
         "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
             "<script>\n",
           

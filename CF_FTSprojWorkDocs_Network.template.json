@@ -659,6 +659,22 @@
                 "GatewayId" : { "Ref" : "igw02FTSwd" }
             }
         },
+        "PeeringRoute1" : {
+            "Type" : "AWS::EC2::Route",
+            "Properties" : {
+                "DestinationCidrBlock": "10.20.10.0/24",
+                "RouteTableId" : { "Ref" : "rtb01FTSwdPublic" },
+                "VpcPeeringConnectionId" : { "Ref" : "myVPCPeeringConnection" }
+            }
+        },
+        "PeeringRoute2" : {
+            "Type" : "AWS::EC2::Route",
+            "Properties" : {
+                "DestinationCidrBlock": "10.10.10.0/24",
+                "RouteTableId" : { "Ref" : "rtb02FTSwdPublic" },
+                "VpcPeeringConnectionId" : { "Ref" : "myVPCPeeringConnection" }
+            }
+        },
         "SubnetPublic01bRouteTableAssociation" : {
             "Type" : "AWS::EC2::SubnetRouteTableAssociation",
             "Properties" : {
@@ -701,6 +717,14 @@
                 "RouteTableId" : { "Ref" : "rtb02FTSwdPrivate"}
             }
         },
+        "myVPCPeeringConnection": {
+            "Type": "AWS::EC2::VPCPeeringConnection",
+            "Properties": {
+                "VpcId": {"Ref": "VPC01FTSwd"},
+                "PeerVpcId": {"Ref": "VPC02FTSwd"}
+            }
+        },
+
         "InboundHTTPPublicNetworkAclEntry2": {
             "Type": "AWS::EC2::NetworkAclEntry",
             "Properties": {

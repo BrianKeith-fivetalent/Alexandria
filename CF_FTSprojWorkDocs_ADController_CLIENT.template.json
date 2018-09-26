@@ -53,7 +53,7 @@
 
   "Mappings" : {
     "AWSRegion2AMI" : {
-      "us-east-1"        : {"Windows2008r2" : "ami-f058458a", "Windows2012r2" : "ami-a64855dc"},
+      "us-east-1"        : {"Windows2016" : "ami-01945499792201081", "Windows2012r2" : "ami-a64855dc"},
       "us-west-2"        : {"Windows2008r2" : "ami-3cc94a44", "Windows2012r2" : "ami-a5d053dd"},
       "us-west-1"        : {"Windows2008r2" : "ami-a40009c4", "Windows2012r2" : "ami-4a020b2a"},
       "eu-west-1"        : {"Windows2008r2" : "ami-eb760692", "Windows2012r2" : "ami-6d601014"},
@@ -143,8 +143,8 @@
         "ImageId" : { "Fn::FindInMap" : [ "AWSRegion2AMI", { "Ref" : "AWS::Region" }, "Windows2016" ]},
         "InstanceType" : { "Ref" : "InstanceType" },
         "KeyName" : { "Ref" : "KeyName" },
-        "SecurityGroupIds": ["sg-068b371e047ff48e5"],
-        "SubnetId" : "subnet-0a5d302032f63bc2a",
+        "SecurityGroupIds": ["sg-0227c92aab1cbcc19"],
+        "SubnetId" : "subnet-0edf260482b901bae",
         "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
             "<script>\n",
           
