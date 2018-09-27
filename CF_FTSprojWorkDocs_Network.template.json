@@ -773,6 +773,54 @@
                 "PortRange": {"From": "1024", "To": "65535"}
             }
         },
+        "InboundVPCb": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPublic"},
+                "RuleNumber": "140",
+                "Protocol": "-1",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "10.10.0.0/16",
+                "PortRange": {"From": "1", "To": "65535"}
+            }
+        },
+        "InboundVPCa": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1FTSwdPublic"},
+                "RuleNumber": "140",
+                "Protocol": "-1",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "10.20.0.0/16",
+                "PortRange": {"From": "1", "To": "65535"}
+            }
+        },
+        "OutboundVPCb": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPublic"},
+                "RuleNumber": "160",
+                "Protocol": "-1",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "10.10.0.0/16",
+                "PortRange": {"From": "1", "To": "65535"}
+            }
+        },
+        "OutboundVPCa": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1FTSwdPublic"},
+                "RuleNumber": "160",
+                "Protocol": "-1",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "10.20.0.0/16",
+                "PortRange": {"From": "1", "To": "65535"}
+            }
+        },
         "OutboundhttpPublicNetworkAclEntry2": {
             "Type": "AWS::EC2::NetworkAclEntry",
             "Properties": {
@@ -917,11 +965,7 @@
                 "PortRange": {"From": "3389", "To": "3389"}
             }
         }
-
-
-
     }
 }
-
 
 

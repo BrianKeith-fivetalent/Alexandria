@@ -20,8 +20,24 @@
         "Type" : "AWS::EC2::VPC::Id",
         "Description" : "Enter the name of the FTSvpc02 VPC",
         "Default": "vpc-017ab52ace5cd63a5"
+        },
+    "tagParamFTSArchitect" : {
+          "Type" : "String",
+          "Default" : "Brian Keith",
+          "Description" : "Enter the name of the Five Talent Architect"
+        },
+    "tagParamFTSProject" : {
+            "Type" : "String",
+            "Default" : "FTS Internal WorkDocs POC",
+            "Description" : "Enter the name of the Five Talent Project"
+        },
+    "tagParamBornDate" : {
+            "Type" : "String",
+            "Default" : "September 25th 2018",
+            "Description" : "Enter the creation date of the CF stack"
         }
     },
+
 
 
   "Resources": {
@@ -32,7 +48,14 @@
           "VpcId": "vpc-0fa5319626629ab6c", 
           "SecurityGroupIngress" : [
             {"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : { "Ref" : "SourceCidrForRDP" }}
-          ]
+          ],
+          "Tags": [
+            {"Key": "Name", "Value": "sg-CORPmember"},
+            {"Key": "Application", "Value": "CORP"},
+            {"Key": "FTSArchitect", "Value":  { "Ref" : "tagParamFTSArchitect" }},
+            {"Key": "FTSProject", "Value":  { "Ref" : "tagParamFTSProject" }},
+            {"Key": "FTSBornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+            ]
         }      
       }, 
 
@@ -60,7 +83,15 @@
                     {"IpProtocol" : "udp", "FromPort" : "445", "ToPort" : "445", "SourceSecurityGroupId" : {"Ref": "DomainMemberSecurityGroup"}},
                     {"IpProtocol" : "udp", "FromPort" : "135", "ToPort" : "135", "SourceSecurityGroupId" : {"Ref": "DomainMemberSecurityGroup"}},
                     {"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : { "Ref" : "SourceCidrForRDP" }},
-                    {"IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "SourceSecurityGroupId" : {"Ref": "DomainMemberSecurityGroup"}}
+                    {"IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : "0.0.0.0/0"},
+                    {"IpProtocol" : "-1", "FromPort" : "0", "ToPort" : "65535", "SourceSecurityGroupId" : {"Ref": "DomainControllerClientSecurityGroup"}}
+                ],
+                "Tags": [
+                    {"Key": "Name", "Value": "sg-CORPDomainController"},
+                    {"Key": "Application", "Value": "CORP"},
+                    {"Key": "FTSArchitect", "Value":  { "Ref" : "tagParamFTSArchitect" }},
+                    {"Key": "FTSProject", "Value":  { "Ref" : "tagParamFTSProject" }},
+                    {"Key": "FTSBornDate", "Value":  { "Ref" : "tagParamBornDate" }}
                 ]
             }      
         },
@@ -72,7 +103,14 @@
               "VpcId": "vpc-017ab52ace5cd63a5",
               "SecurityGroupIngress" : [
                 {"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : { "Ref" : "SourceCidrForRDP" }}
-              ]
+              ],
+              "Tags": [
+                {"Key": "Name", "Value": "sg-CLIENTmember"},
+                {"Key": "Application", "Value": "CLIENT"},
+                {"Key": "FTSArchitect", "Value":  { "Ref" : "tagParamFTSArchitect" }},
+                {"Key": "FTSProject", "Value":  { "Ref" : "tagParamFTSProject" }},
+                {"Key": "FTSBornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
             }      
           }, 
 
@@ -100,8 +138,16 @@
                     {"IpProtocol" : "udp", "FromPort" : "445", "ToPort" : "445", "SourceSecurityGroupId" : {"Ref": "DomainMemberClientSecurityGroup"}},
                     {"IpProtocol" : "udp", "FromPort" : "135", "ToPort" : "135", "SourceSecurityGroupId" : {"Ref": "DomainMemberClientSecurityGroup"}},
                     {"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : { "Ref" : "SourceCidrForRDP" }},
-                    {"IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "SourceSecurityGroupId" : {"Ref": "DomainMemberClientSecurityGroup"}}
-                ]
+                    {"IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : "0.0.0.0/0"},
+                    {"IpProtocol" : "-1", "FromPort" : "0", "ToPort" : "65535", "SourceSecurityGroupId" : {"Ref": "DomainMemberSecurityGroup"}}
+                ],
+                "Tags": [
+                    {"Key": "Name", "Value": "sg-CLIENTDomainController"},
+                    {"Key": "Application", "Value": "CLIENT"},
+                    {"Key": "FTSArchitect", "Value":  { "Ref" : "tagParamFTSArchitect" }},
+                    {"Key": "FTSProject", "Value":  { "Ref" : "tagParamFTSProject" }},
+                    {"Key": "FTSBornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                    ]
             }      
         } 
     } 
