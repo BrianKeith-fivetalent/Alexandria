@@ -82,6 +82,7 @@
                     {"IpProtocol" : "tcp", "FromPort" : "445", "ToPort" : "445", "SourceSecurityGroupId" : {"Ref": "DomainMemberSecurityGroup"}},
                     {"IpProtocol" : "udp", "FromPort" : "445", "ToPort" : "445", "SourceSecurityGroupId" : {"Ref": "DomainMemberSecurityGroup"}},
                     {"IpProtocol" : "udp", "FromPort" : "135", "ToPort" : "135", "SourceSecurityGroupId" : {"Ref": "DomainMemberSecurityGroup"}},
+                    {"IpProtocol" : "tcp", "FromPort" : "5722", "ToPort" : "5722", "SourceSecurityGroupId" : {"Ref": "DomainMemberSecurityGroup"}},
                     {"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : { "Ref" : "SourceCidrForRDP" }},
                     {"IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : "0.0.0.0/0"},
                     {"IpProtocol" : "-1", "FromPort" : "0", "ToPort" : "65535", "SourceSecurityGroupId" : {"Ref": "DomainControllerClientSecurityGroup"}}
@@ -136,6 +137,7 @@
                     {"IpProtocol" : "udp", "FromPort" : "88", "ToPort" : "88", "SourceSecurityGroupId" : {"Ref": "DomainMemberClientSecurityGroup"}},
                     {"IpProtocol" : "tcp", "FromPort" : "445", "ToPort" : "445", "SourceSecurityGroupId" : {"Ref": "DomainMemberClientSecurityGroup"}},
                     {"IpProtocol" : "udp", "FromPort" : "445", "ToPort" : "445", "SourceSecurityGroupId" : {"Ref": "DomainMemberClientSecurityGroup"}},
+                    {"IpProtocol" : "tcp", "FromPort" : "5722", "ToPort" : "5722", "SourceSecurityGroupId" : {"Ref": "DomainMemberClientSecurityGroup"}},
                     {"IpProtocol" : "udp", "FromPort" : "135", "ToPort" : "135", "SourceSecurityGroupId" : {"Ref": "DomainMemberClientSecurityGroup"}},
                     {"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : { "Ref" : "SourceCidrForRDP" }},
                     {"IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : "0.0.0.0/0"},
