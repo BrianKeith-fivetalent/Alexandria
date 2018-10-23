@@ -3,6 +3,6 @@ variable "aws_profile" {}
 data "aws_availability_zones" "avaiable" {}
 variable "vpc_cidr" {}
 
-variable " cidrs" {
+variable "cidrs" {
         type = "map"
 }
