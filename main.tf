@@ -400,7 +400,7 @@ resource "aws_elb" "wp-elb" {
   connection_draining_timeout = 400
 
   tags {
-    Name = "wp_${var.domain_name}"
+    Name = "wp_${var.domain_name}-elb"
   }
 }
 
