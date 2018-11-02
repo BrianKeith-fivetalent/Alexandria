@@ -1,6 +1,6 @@
 variable "aws_region" {}
 variable "aws_profile" {}
-data "aws_availability_zones" "avaiable" {}
+data "aws_availability_zones" "available" {}
 variable "vpc_cidr" {}
 
 variable "cidrs" {
@@ -25,3 +25,10 @@ variable "dev_ami" {}
 variable "public_key_path"   {}
 
 variable "key_name" {}
+
+variable "lc_instance_type" {}
+variable "asg_max" {}
+variable "asg_min" {}
+variable "asg_grace" {}
+variable "asg_hct" {}
+variable "asg_cap" {}
