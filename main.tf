@@ -233,7 +233,7 @@ resource "aws_security_group" "wp_dev_sg" {
     from_port = 80
     to_port = 80
     protocol = "tcp"
-    cidr_blocks = ["${var.localip}"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -360,7 +360,7 @@ resource "aws_s3_bucket" "code" {
 resource "aws_db_instance" "wp_db" {
   allocated_storage = 10
   engine = "mysql"
-  engine_version = "5.6.27"
+  engine_version = "5.6.41"
   instance_class = "${var.db_instance_class}"
   name = "${var.dbname}"
   username = "${var.dbuser}"
@@ -408,7 +408,7 @@ EOD
   }
 
   provisioner "local-exec" {
-    command = "aws ec2 wait instance-status-ok --instance-ids ${aws_instance.wp_dev.id} --profile superhere && ansible-playbook -i aws_hosts wordpress.yml"
+    command = "aws ec2 wait instance-status-ok --instance-ids ${aws_instance.wp_dev.id} --profile superhero && ansible-playbook -i aws_hosts wordpress.yml"
 
   }
 }
