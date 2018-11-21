@@ -519,6 +519,67 @@ resource "aws_autoscaling_group" "wp_asg" {
   }
 }
 
+#------ Route 53 ------
+
+#Primary Zone
+
+resource "aws_route53_zone" "primaary" {
+  name = "${var.domain_name}.net"
+  delegation_set_id = "${var.delegation_set}"
+}
+
+#WWW
+
+resource "aws_route53_record" "www" {
+  zone_id = "${aws_route53_zone.primaary.zone_id}"
+  name = "www.${var.domain_name}.net"
+  type = "A"
+
+  alias {
+    name = "${aws_elb.wp-elb.dns_name}"
+    zone_id = "${aws_elb.wp-elb.zone_id}"
+    evaluate_target_health = false 
+  }
+}
+
+#DEV
+
+resource "aws_route53_record" "dev" {
+  zone_id = "${aws_route53_zone.primaary.zone_id}"
+  name = "dev.${var.domain_name}.net"
+  type = "A"
+  ttl = "300"
+  records = ["${aws_instance.wp_dev.public_ip}"]
+}
+
+
+#Private zone
+
+resource "aws_route53_zone" "secondary" {
+  name = "${var.domain_name}.net"
+  vpc_id = "${aws_vpc.wp_vpc.id}"
+}
+
+#DB
+
+resource "aws_route53_record" "db" {
+  zone_id = "${aws_route53_zone.secondary.zone_id}"
+  name = "db.${var.domain_name}.net"
+  type = "CNAME"
+  ttl = "300"
+  records = ["${aws_db_instance.wp_db.address}"]
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
