@@ -1,0 +1,961 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+
+    "Description" : "Network Sandbox Setup for FTSprojWorkDocs Proof of Concept. Creates a network of 2 VPCs, 6 subnets, IGWs, Security Groups, and related resources",
+
+    "Parameters" : {
+        "tagParamArchitect" : {
+          "Type" : "String",
+          "Default" : "Brian Keith",
+          "Description" : "Enter the name of the Architect"
+        },
+        "tagParamProject" : {
+            "Type" : "String",
+            "Default" : "RFR ManagedAD and Workdocs Network",
+            "Description" : "Enter the name of the Project"
+        },
+        "tagParamBornDate" : {
+            "Type" : "String",
+            "Default" : "November 29th 2018",
+            "Description" : "Enter the creation date of the CF stack"
+        }
+      },
+
+    "Mappings" : {
+        "SubnetConfig" : {
+            "VPCa" : {"CIDR": "10.10.0.0/16"},
+            "VPCb" : {"CIDR": "10.20.0.0/16"}
+        }
+    },
+
+    "Resources" : {
+        "VPC01RFRwd" : {
+            "Type" : "AWS::EC2::VPC",
+            "Properties" : {
+                "CidrBlock": { "Fn::FindInMap" : [ "SubnetConfig", "VPCa", "CIDR" ]},
+                "InstanceTenancy": "default",
+                "EnableDnsSupport": "true",
+                "EnableDnsHostnames": "true",
+                "Tags": [
+                    {"Key": "Name", "Value": "VPC01RFRwd"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+        "igw01RFRwd": {
+            "Type": "AWS::EC2::InternetGateway",
+            "Properties": {
+                "Tags": [
+                    {"Key": "Name", "Value": "igw01RFRwd"},
+                    {"Key": "Network", "Value" : "Public"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+
+        "AttachGateway" : {
+            "Type" : "AWS::EC2::VPCGatewayAttachment",
+            "Properties" : {
+                "VpcId" : { "Ref" : "VPC01RFRwd"},
+                "InternetGatewayId" : { "Ref" : "igw01RFRwd"}
+            }
+        },
+        "PublicSubnet01a" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "VpcId" : { "Ref" : "VPC01RFRwd"},
+                "AvailabilityZone" : {"Fn::Select" : [ "0", { "Fn::GetAZs": ""}]},
+                "CidrBlock" : "10.10.10.0/24",
+                "MapPublicIpOnLaunch": "true",
+                "Tags": [
+                    {"Key": "Name", "Value": "PublicSubnet01a"},
+                    {"Key": "Network", "Value" : "Publica"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+        "PublicSubnet02a" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "VpcId" : { "Ref" : "VPC01RFRwd"},
+                "AvailabilityZone" : {"Fn::Select" : [ "1", { "Fn::GetAZs": ""}]},
+                "CidrBlock" : "10.10.12.0/24",
+                "MapPublicIpOnLaunch": "true",
+                "Tags": [
+                    {"Key": "Name", "Value": "PublicSubnet02a"},
+                    {"Key": "Network", "Value" : "Publica"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+        "PrivateSubnet01a" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "VpcId" : { "Ref" : "VPC01RFRwd"},
+                "AvailabilityZone" : { "Fn::Select" : [ "0", { "Fn::GetAZs": ""}]},
+                "CidrBlock" : "10.10.110.0/24",
+                "MapPublicIpOnLaunch": "false",
+                "Tags": [
+                    {"Key": "Name", "Value": "PrivateSubnet01a"},
+                    {"Key": "Network", "Value" : "Privatea"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+        "PrivateSubnet02a" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "VpcId" : { "Ref" : "VPC01RFRwd"},
+                "AvailabilityZone" : { "Fn::Select" : [ "1", { "Fn::GetAZs": ""}]},
+                "CidrBlock" : "10.10.120.0/24",
+                "MapPublicIpOnLaunch": "false",
+                "Tags": [
+                    {"Key": "Name", "Value": "PrivateSubnet02a"},
+                    {"Key": "Network", "Value" : "Privatea"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+        "dcpt0RFRSwd": {
+            "Type": "AWS::EC2::DHCPOptions",
+            "Properties": {
+                "DomainName": "ec2.internal",
+                "DomainNameServers": [ "AmazonProvidedDNS"],
+                "Tags": [
+                    {"Key": "Name", "Value": "dcpt01RFRwd"},
+                    {"Key": "Network", "Value" : "Publica"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+        "acl1RFRwdPublic": {
+            "Type": "AWS::EC2::NetworkAcl",
+            "Properties": {
+                "VpcId": {"Ref": "VPC01RFRwd"},
+                "Tags": [
+                    {"Key": "Name", "Value": "acl1RFRwdPublic"},
+                    {"Key": "Network", "Value" : "Publica"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+
+        "SubnetPublic01NetworkAclAssociation" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PublicSubnet01a"},
+                "NetworkAclId" : { "Ref" : "acl1RFRwdPublic"}
+            }
+        },
+        "SubnetPublic02NetworkAclAssociation" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PublicSubnet02a"},
+                "NetworkAclId" : { "Ref" : "acl1RFRwdPublic"}
+            }
+        },
+        "acl1RFRwdPrivate": {
+            "Type": "AWS::EC2::NetworkAcl",
+            "Properties": {
+                "VpcId": {"Ref": "VPC01RFRwd"},
+                "Tags": [
+                    {"Key": "Name", "Value": "acl1RFRwdPrivate"},
+                    {"Key": "Network", "Value" : "Private"}
+                ]
+            }
+        },
+        "SubnetPrivate01NetworkAclAssociation" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PrivateSubnet01a"},
+                "NetworkAclId" : { "Ref" : "acl1RFRwdPrivate"}
+            }
+        },
+        "SubnetPrivate02NetworkAclAssociation" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PrivateSubnet02a"},
+                "NetworkAclId" : { "Ref" : "acl1RFRwdPrivate"}
+            }
+        },
+        "rtb01FTSwdPublic": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {"Ref": "VPC01RFRwd"},
+                "Tags": [
+                    {"Key": "Name", "Value": "rtb01FTSwdPublic"},
+                    {"Key": "Network", "Value" : "Public"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+
+        "IgwRoute" : {
+            "Type" : "AWS::EC2::Route",
+            "DependsOn" : "igw01RFRwd",
+            "Properties" : {
+                "RouteTableId" : { "Ref" : "rtb01FTSwdPublic"},
+                "DestinationCidrBlock" : "0.0.0.0/0",
+                "GatewayId" : { "Ref" : "igw01RFRwd" }
+            }
+        },
+        "SubnetPublic01RouteTableAssociation" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PublicSubnet01a"},
+                "RouteTableId" : { "Ref" : "rtb01FTSwdPublic"}
+            }
+        },
+        "SubnetPublic02RouteTableAssociation" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PublicSubnet02a"},
+                "RouteTableId" : { "Ref" : "rtb01FTSwdPublic"}
+            }
+        },
+        "rtb01FTSwdPrivate": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {"Ref": "VPC01RFRwd"},
+                "Tags": [
+                    {"Key": "Name", "Value": "rtb01FTSwdPrivate"},
+                    {"Key" : "Application", "Value": "CORP"},
+                    {"Key" : "Network", "Value" : "Private"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+        "SubnetPrivate01RouteTableAssociation" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PrivateSubnet01a"},
+                "RouteTableId" : { "Ref" : "rtb01FTSwdPrivate"}
+            }
+        },
+        "SubnetPrivate02RouteTableAssociation" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PrivateSubnet02a"},
+                "RouteTableId" : { "Ref" : "rtb01FTSwdPrivate"}
+            }
+        },
+        "InboundHTTPPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1RFRwdPublic"},
+                "RuleNumber": "100",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "80", "To": "80"}
+            }
+        },
+        "InboundHTTPSPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1RFRwdPublic"},
+                "RuleNumber": "110",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "443", "To": "443"}
+            }
+        },
+        "InboundRDPPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1RFRwdPublic"},
+                "RuleNumber": "120",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "52.88.41.78/0",
+                "PortRange": {"From": "3389", "To": "3389"}
+            }
+        },
+        "InboundDynamicPortsPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1RFRwdPublic"},
+                "RuleNumber": "130",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "1024", "To": "65535"}
+            }
+        },
+        "OutboundhttpPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1RFRwdPublic"},
+                "RuleNumber": "100",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "80", "To": "80"}
+            }
+        },
+        "OutboundhttpsPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1RFRwdPublic"},
+                "RuleNumber": "110",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "443", "To": "443"}
+            }
+        },
+        "OutboundEphemeralPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1RFRwdPublic"},
+                "RuleNumber": "140",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "32768", "To": "65535"}
+            }
+        },
+        "OutboundRDPPublicNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1RFRwdPublic"},
+                "RuleNumber": "150",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "10.10.0.0/16",
+                "PortRange": {"From": "3389", "To": "3389"}
+            }
+        },
+        "InboundHttpPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1RFRwdPrivate"},
+                "RuleNumber": "110",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "10.10.0.0/16",
+                "PortRange": {"From": "80", "To": "80"}
+            }
+        },
+        "InboundHttpsPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1RFRwdPrivate"},
+                "RuleNumber": "120",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "10.10.0.0/16",
+                "PortRange": {"From": "443", "To": "443"}
+            }
+        },
+        "InboundRDPPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1RFRwdPrivate"},
+                "RuleNumber": "130",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "10.10.0.0/16",
+                "PortRange": {"From": "3389", "To": "3389"}
+            }
+        },
+        "InboundEphemeralPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1RFRwdPrivate"},
+                "RuleNumber": "140",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "10.10.0.0/16",
+                "PortRange": {"From": "1024", "To": "65535"}
+            }
+        },
+        "OutboundhttpPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1RFRwdPrivate"},
+                "RuleNumber": "100",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "80", "To": "80"}
+            }
+        },
+        "OutboundhttpsPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1RFRwdPrivate"},
+                "RuleNumber": "110",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "443", "To": "443"}
+            }
+        },
+        "OutboundEphemeralPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1RFRwdPrivate"},
+                "RuleNumber": "120",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "32768", "To": "65535"}
+            }
+        },
+        "OutBoundRDPPrivateNetworkAclEntry": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1RFRwdPrivate"},
+                "RuleNumber": "140",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "10.10.0.0/16",
+                "PortRange": {"From": "3389", "To": "3389"}
+            }
+        },
+        "VPC02FTSwd" : {
+            "Type" : "AWS::EC2::VPC",
+            "Properties" : {
+                "CidrBlock": { "Fn::FindInMap" : [ "SubnetConfig", "VPCb", "CIDR" ]},
+                "InstanceTenancy": "default",
+                "EnableDnsSupport": "true",
+                "EnableDnsHostnames": "true",
+                "Tags": [
+                    {"Key": "Name", "Value": "VPC02FTSwd"},
+                    {"Key": "Application", "Value": "CLIENT"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+        "igw02FTSwd": {
+            "Type": "AWS::EC2::InternetGateway",
+            "Properties": {
+                "Tags": [
+                    {"Key": "Name", "Value": "igw02FTSwd"},
+                    {"Key": "Application", "Value": "CLIENT"},
+                    {"Key": "Network", "Value" : "Public"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+        "AttachGateway2" : {
+            "Type" : "AWS::EC2::VPCGatewayAttachment",
+            "Properties" : {
+                "VpcId" : { "Ref" : "VPC02FTSwd"},
+                "InternetGatewayId" : { "Ref" : "igw02FTSwd"}
+            }
+        },
+        "PublicSubnet01b" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "VpcId" : { "Ref" : "VPC02FTSwd"},
+                "AvailabilityZone" : {"Fn::Select" : [ "0", { "Fn::GetAZs": ""}]},
+                "CidrBlock" : "10.20.10.0/24",
+                "MapPublicIpOnLaunch": "true",
+                "Tags": [
+                    {"Key": "Name", "Value": "PublicSubnet01b"},
+                    {"Key": "Application", "Value": "CLIENT"},
+                    {"Key": "Network", "Value" : "Publicb"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+        "PublicSubnet02b" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "VpcId" : { "Ref" : "VPC02FTSwd"},
+                "AvailabilityZone" : {"Fn::Select" : [ "1", { "Fn::GetAZs": ""}]},
+                "CidrBlock" : "10.20.12.0/24",
+                "MapPublicIpOnLaunch": "true",
+                "Tags": [
+                    {"Key": "Name", "Value": "PublicSubnet02b"},
+                    {"Key": "Application", "Value": "CLIENT"},
+                    {"Key": "Network", "Value" : "Publicb"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+        
+        "PrivateSubnet01b" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "VpcId" : { "Ref" : "VPC02FTSwd"},
+                "AvailabilityZone" : { "Fn::Select" : [ "0", { "Fn::GetAZs": ""}]},
+                "CidrBlock" : "10.20.110.0/24",
+                "MapPublicIpOnLaunch": "false",
+                "Tags": [
+                    {"Key": "Name", "Value": "PrivateSubnet01b"},
+                    {"Key": "Application", "Value": "CLIENT"},
+                    {"Key": "Network", "Value" : "Privateb"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+        "PrivateSubnet02b" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "VpcId" : { "Ref" : "VPC02FTSwd"},
+                "AvailabilityZone" : { "Fn::Select" : [ "1", { "Fn::GetAZs": ""}]},
+                "CidrBlock" : "10.20.120.0/24",
+                "MapPublicIpOnLaunch": "false",
+                "Tags": [
+                    {"Key": "Name", "Value": "PrivateSubnet02b"},
+                    {"Key": "Application", "Value": "CLIENT"},
+                    {"Key": "Network", "Value" : "Privateb"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+        "dcpt02FTSwd": {
+            "Type": "AWS::EC2::DHCPOptions",
+            "Properties": {
+                "DomainName": "ec2.internal",
+                "DomainNameServers": [ "AmazonProvidedDNS"],
+                "Tags": [
+                    {"Key": "Name", "Value": "dcpt02FTSwd"},
+                    {"Key": "Application", "Value": "CLIENT"},
+                    {"Key": "Network", "Value" : "Publicb"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+        "acl2FTSwdPublic": {
+            "Type": "AWS::EC2::NetworkAcl",
+            "Properties": {
+                "VpcId": {"Ref": "VPC02FTSwd"},
+                "Tags": [
+                    {"Key": "Name", "Value": "acl2FTSwdPublic"},
+                    {"Key": "Application", "Value": "CLIENT"},
+                    {"Key": "Network", "Value" : "Publicb"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+
+        "SubnetPublic01bNetworkAclAssociation" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PublicSubnet01b"},
+                "NetworkAclId" : { "Ref" : "acl2FTSwdPublic"}
+            }
+        },
+        "SubnetPublic02bNetworkAclAssociation" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PublicSubnet02b"},
+                "NetworkAclId" : { "Ref" : "acl2FTSwdPublic"}
+            }
+        },
+        "acl2FTSwdPrivate": {
+            "Type": "AWS::EC2::NetworkAcl",
+            "Properties": {
+                "VpcId": {"Ref": "VPC02FTSwd"},
+                "Tags": [
+                    {"Key": "Name", "Value": "acl2FTSwdPrivate"},
+                    {"Key": "Application", "Value": "CLIENT"},
+                    {"Key": "Network", "Value" : "Private"}
+                ]
+            }
+        },
+        "SubnetPrivate01bNetworkAclAssociation" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PrivateSubnet01b"},
+                "NetworkAclId" : { "Ref" : "acl2FTSwdPrivate"}
+            }
+        },
+        "SubnetPrivate02aNetworkAclAssociation" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PrivateSubnet02b"},
+                "NetworkAclId" : { "Ref" : "acl2FTSwdPrivate"}
+            }
+        },
+        "rtb02FTSwdPublic": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {"Ref": "VPC02FTSwd"},
+                "Tags": [
+                    {"Key": "Name", "Value": "rtb02FTSwdPublic"},
+                    {"Key": "Application", "Value": "CLIENT"},
+                    {"Key": "Network", "Value" : "Public"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+
+        "IgwRoute2" : {
+            "Type" : "AWS::EC2::Route",
+            "DependsOn" : "igw02FTSwd",
+            "Properties" : {
+                "RouteTableId" : { "Ref" : "rtb02FTSwdPublic"},
+                "DestinationCidrBlock" : "0.0.0.0/0",
+                "GatewayId" : { "Ref" : "igw02FTSwd" }
+            }
+        },
+        "PeeringRoute1" : {
+            "Type" : "AWS::EC2::Route",
+            "Properties" : {
+                "DestinationCidrBlock": "10.20.10.0/24",
+                "RouteTableId" : { "Ref" : "rtb01FTSwdPublic" },
+                "VpcPeeringConnectionId" : { "Ref" : "myVPCPeeringConnection" }
+            }
+        },
+        "PeeringRoute2" : {
+            "Type" : "AWS::EC2::Route",
+            "Properties" : {
+                "DestinationCidrBlock": "10.10.10.0/24",
+                "RouteTableId" : { "Ref" : "rtb02FTSwdPublic" },
+                "VpcPeeringConnectionId" : { "Ref" : "myVPCPeeringConnection" }
+            }
+        },
+        "SubnetPublic01bRouteTableAssociation" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PublicSubnet01b"},
+                "RouteTableId" : { "Ref" : "rtb02FTSwdPublic"}
+            }
+        },
+        "SubnetPublic02bRouteTableAssociation" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PublicSubnet02b"},
+                "RouteTableId" : { "Ref" : "rtb02FTSwdPublic"}
+            }
+        },
+        "rtb02FTSwdPrivate": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {"Ref": "VPC02FTSwd"},
+                "Tags": [
+                    {"Key": "Name", "Value": "rtb02FTSwdPrivate"},
+                    {"Key" : "Application", "Value": "CLIENT"},
+                    {"Key" : "Network", "Value" : "Private"},
+                    {"Key": "Architect", "Value":  { "Ref" : "tagParamArchitect" }},
+                    {"Key": "Project", "Value":  { "Ref" : "tagParamProject" }},
+                    {"Key": "BornDate", "Value":  { "Ref" : "tagParamBornDate" }}
+                ]
+            }
+        },
+        "SubnetPrivate01bRouteTableAssociation" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PrivateSubnet01b"},
+                "RouteTableId" : { "Ref" : "rtb02FTSwdPrivate"}
+            }
+        },
+        "SubnetPrivate02bRouteTableAssociation" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "PrivateSubnet02b"},
+                "RouteTableId" : { "Ref" : "rtb02FTSwdPrivate"}
+            }
+        },
+        "myVPCPeeringConnection": {
+            "Type": "AWS::EC2::VPCPeeringConnection",
+            "Properties": {
+                "VpcId": {"Ref": "VPC01RFRwd"},
+                "PeerVpcId": {"Ref": "VPC02FTSwd"}
+            }
+        },
+
+        "InboundHTTPPublicNetworkAclEntry2": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPublic"},
+                "RuleNumber": "100",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "80", "To": "80"}
+            }
+        },
+        "InboundHTTPSPublicNetworkAclEntry2": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPublic"},
+                "RuleNumber": "110",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "443", "To": "443"}
+            }
+        },
+        "InboundRDPPublicNetworkAclEntry2": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPublic"},
+                "RuleNumber": "120",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "52.88.41.78/0",
+                "PortRange": {"From": "3389", "To": "3389"}
+            }
+        },
+        "InboundDynamicPortsPublicNetworkAclEntry2": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPublic"},
+                "RuleNumber": "130",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "1024", "To": "65535"}
+            }
+        },
+        "InboundVPCb": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPublic"},
+                "RuleNumber": "140",
+                "Protocol": "-1",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "10.10.0.0/16",
+                "PortRange": {"From": "1", "To": "65535"}
+            }
+        },
+        "InboundVPCa": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1RFRwdPublic"},
+                "RuleNumber": "140",
+                "Protocol": "-1",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "10.20.0.0/16",
+                "PortRange": {"From": "1", "To": "65535"}
+            }
+        },
+        "OutboundVPCb": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPublic"},
+                "RuleNumber": "160",
+                "Protocol": "-1",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "10.10.0.0/16",
+                "PortRange": {"From": "1", "To": "65535"}
+            }
+        },
+        "OutboundVPCa": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl1RFRwdPublic"},
+                "RuleNumber": "160",
+                "Protocol": "-1",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "10.20.0.0/16",
+                "PortRange": {"From": "1", "To": "65535"}
+            }
+        },
+        "OutboundhttpPublicNetworkAclEntry2": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPublic"},
+                "RuleNumber": "100",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "80", "To": "80"}
+            }
+        },
+        "OutboundhttpsPublicNetworkAclEntry2": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPublic"},
+                "RuleNumber": "110",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "443", "To": "443"}
+            }
+        },
+        "OutboundEphemeralPublicNetworkAclEntry2": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPublic"},
+                "RuleNumber": "140",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "32768", "To": "65535"}
+            }
+        },
+        "OutboundRDPPublicNetworkAclEntry2": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPublic"},
+                "RuleNumber": "150",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "10.20.0.0/16",
+                "PortRange": {"From": "3389", "To": "3389"}
+            }
+        },
+        "InboundHttpPrivateNetworkAclEntry2": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPrivate"},
+                "RuleNumber": "110",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "10.20.0.0/16",
+                "PortRange": {"From": "80", "To": "80"}
+            }
+        },
+        "InboundHttpsPrivateNetworkAclEntry2": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPrivate"},
+                "RuleNumber": "120",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "10.20.0.0/16",
+                "PortRange": {"From": "443", "To": "443"}
+            }
+        },
+        "InboundRDPPrivateNetworkAclEntry2": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPrivate"},
+                "RuleNumber": "130",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "10.20.0.0/16",
+                "PortRange": {"From": "3389", "To": "3389"}
+            }
+        },
+        "InboundEphemeralPrivateNetworkAclEntry2": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPrivate"},
+                "RuleNumber": "140",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "false",
+                "CidrBlock": "10.20.0.0/16",
+                "PortRange": {"From": "1024", "To": "65535"}
+            }
+        },
+        "OutboundhttpPrivateNetworkAclEntry2": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPrivate"},
+                "RuleNumber": "100",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "80", "To": "80"}
+            }
+        },
+        "OutboundhttpsPrivateNetworkAclEntry2": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPrivate"},
+                "RuleNumber": "110",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "443", "To": "443"}
+            }
+        },
+        "OutboundEphemeralPrivateNetworkAclEntry2": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPrivate"},
+                "RuleNumber": "120",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": {"From": "32768", "To": "65535"}
+            }
+        },
+        "OutBoundRDPPrivateNetworkAclEntry2": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": {"Ref": "acl2FTSwdPrivate"},
+                "RuleNumber": "140",
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "Egress": "true",
+                "CidrBlock": "10.20.0.0/16",
+                "PortRange": {"From": "3389", "To": "3389"}
+            }
+        }
+    }
+}
+
+
