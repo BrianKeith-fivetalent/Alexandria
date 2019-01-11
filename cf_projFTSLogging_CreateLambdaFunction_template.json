@@ -95,3 +95,4 @@
       "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-Function" }}
     }
   }
+}
