@@ -444,7 +444,7 @@ Resources:
       ElasticsearchVersion: 6.3
       # V5804310 - 10/09/2018 - ES Encryption at rest
       EncryptionAtRestOptions:
-        Enabled: true
+        Enabled: false
       ElasticsearchClusterConfig:
         DedicatedMasterEnabled: true
         InstanceCount: !FindInMap [NodeCount, elasticsearch, !Ref ClusterSize]
