@@ -452,6 +452,11 @@ Resources:
         InstanceType: !FindInMap [InstanceSizing, elasticsearch, !Ref ClusterSize]
         DedicatedMasterType: !FindInMap [MasterSizing, elasticsearch, !Ref ClusterSize]
         DedicatedMasterCount: 3
+      EBSOptions: 
+        EBSEnabled: true
+        Iops: 0
+        VolumeSize: 20
+        VolumeType: "gp2"
       SnapshotOptions:
         AutomatedSnapshotStartHour: '1'
       AccessPolicies:
