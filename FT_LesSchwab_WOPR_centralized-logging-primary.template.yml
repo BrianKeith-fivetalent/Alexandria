@@ -4,6 +4,9 @@
 # **DO NOT DELETE**
 #
 # author: aws-solutions-builder@
+#
+# Modified by Brian Keith 28 Feb 2019
+# Added small instances and related info foe ElasticSearch
 AWSTemplateFormatVersion: 2010-09-09
 
 Description: (SO0009) - AWS Centralized Logging Solution, primary template
@@ -32,10 +35,11 @@ Parameters:
 
   # ES cluster size
   ClusterSize:
-    Description: Amazon ES cluster size; small (2 data nodes), medium (4 data nodes), large (10 data nodes)
+    Description: Amazon ES cluster size; DevSize (2 t2 nodes) small (2 data nodes), medium (4 data nodes), large (10 data nodes)
     Type: String
-    Default: Small
+    Default: DevSize
     AllowedValues:
+    - DevSize
     - Small
     - Medium
     - Large
@@ -135,18 +139,21 @@ Mappings:
   # V57271571 - 10/09/2018 - update tshirt size
   InstanceSizing:
     elasticsearch:
+      DevSize: t2.small.elasticsearch
       Small: i3.large.elasticsearch
       Medium: i3.2xlarge.elasticsearch
       Large: i3.4xlarge.elasticsearch
 
   MasterSizing:
     elasticsearch:
+      DevSize: t2.small.elasticsearch
       Small: c4.large.elasticsearch
       Medium: c4.large.elasticsearch
       Large: c4.large.elasticsearch
 
   NodeCount:
     elasticsearch:
+      DevSize: '1'
       Small: '4'
       Medium: '6'
       Large: '6'
@@ -431,7 +438,7 @@ Resources:
 
   ElasticsearchAWSLogs:
     Type: AWS::Elasticsearch::Domain
-    DeletionPolicy: Retain
+    #DeletionPolicy: Retain
     Properties:
       DomainName: !Ref DOMAINNAME
       ElasticsearchVersion: 6.3
