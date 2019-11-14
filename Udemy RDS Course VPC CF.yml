@@ -1,12 +1,12 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "YMAL string"
+Description: "VPC Networking CloudFormation Template"
 # --------------------------------------------------------------------------------------
 #- Author: Brian Keith
-#- Date: 10 OCT 2019
-#- Name: get_AWSInventory.ps1
-#- Description: List various AWS resources in a given account
+#- Date: 13 NOV 2019
+#- Name:Udemy RDS Course VPC CF.yml
+#- Description: Creates the VPC and related networking resources
 #- Version: 0.1
-#- Purpose: Recon! What are we dealing with
+#- Purpose: The template is used with Udemy RDS course. Creates VPC with subnets and components
 #----------------------------------------------------------------------------------------- 
 
 # Metadata: 
@@ -38,7 +38,7 @@ Resources:
           Value: 'Build a VPC for RDS course'
 
 #CREATE SUBNETS
-  subPublic1a:
+  subPublic2a:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId:
@@ -46,10 +46,10 @@ Resources:
       CidrBlock: 10.0.1.0/24
       AvailabilityZone: "us-west-2a"
       Tags:
-      - Key: name
-        Value: subPublic2a
+      - Key: Name
+        Value: subRDSPublic2a
 
-  subPublic1b:
+  subPublic2b:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId:
@@ -57,15 +57,37 @@ Resources:
       CidrBlock: 10.0.2.0/24
       AvailabilityZone: "us-west-2b"
       Tags:
-      - Key: name
-        Value: subPublic2b
+      - Key: Name
+        Value: subRDSPublic2b
   
+  subPrivate2a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: myRDSVPC
+      CidrBlock: 10.0.10.0/24
+      AvailabilityZone: "us-west-2a"
+      Tags:
+      - Key: Name
+        Value: subRDSPrivate2a
+
+  subPrivate2b:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: myRDSVPC
+      CidrBlock: 10.0.20.0/24
+      AvailabilityZone: "us-west-2b"
+      Tags:
+      - Key: Name
+        Value: subRDSPrivate2b 
+
 #CREATE INTERNET GATEWAY
   igwInternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
-      - Key: name
+      - Key: Name
         Value: igwInternetGateway
   AttachGateway:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -75,45 +97,122 @@ Resources:
       InternetGatewayId:
         Ref: igwInternetGateway 
 
-#CREATE ROUTE TABLE and ROUTES
-  rtbMainRouteTable:
+#CREATE PUBLIC ROUTE TABLE and ROUTES
+  rtbPublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId:  
         Ref: myRDSVPC
       Tags:
-      - Key: name
-        Value: rtbMainRouteTable
+      - Key: Name
+        Value: rtbPublicRouteTable
 
-  myRoute:
+  myPubRoute:
     Type: AWS::EC2::Route
     #DependsOn: GatewayToInternet
     Properties:
        RouteTableId:
-         Ref: rtbMainRouteTable
+         Ref: rtbPublicRouteTable
        DestinationCidrBlock: 0.0.0.0/0
        GatewayId:
          Ref: igwInternetGateway
 
-  mySubnetRouteTableAssociation2a:
+  mySubnetRouteTableAssociationPublic2a:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId:
-        Ref: subPublic1a
+        Ref: subPublic2a
       RouteTableId:
-        Ref: rtbMainRouteTable
+        Ref: rtbPublicRouteTable
 
-  mySubnetRouteTableAssociation2b:
+  mySubnetRouteTableAssociationPublic2b:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId:
         Ref: subPublic2b
       RouteTableId:
-        Ref: rtbMainRouteTable
+        Ref: rtbPublicRouteTable
+
+#CREATE PRIVATE ROUTE TABLE AND ROUTES
+  rtbPrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:  
+        Ref: myRDSVPC
+      Tags:
+      - Key: Name
+        Value: rtbPrivateRouteTable
+
+  mySubnetRouteTableAssociationPrivate2a:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: subPrivate2a
+      RouteTableId:
+        Ref: rtbPrivateRouteTable
+
+  mySubnetRouteTableAssociationPrivate2b:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: subPrivate2b
+      RouteTableId:
+        Ref: rtbPrivateRouteTable
+
+
+#CREATE ACLs for PUBLIC and PRIVATE SUBNETS
+  aclPublicSubs:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId:
+        Ref: myRDSVPC
+      Tags:
+        - Key: Name
+          Value: aclPublicSubs
+
+  myPublic2aSubnetNetworkAclAssociation:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId:
+        Ref: subPublic2a
+      NetworkAclId:
+        Ref: aclPublicSubs
+  myPublic2bSubnetNetworkAclAssociation:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId:
+        Ref: subPublic2b
+      NetworkAclId:
+        Ref: aclPublicSubs
 
 
 
+  aclPrivateSubs:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId:
+        Ref: myRDSVPC
+      Tags:
+        - Key: Name
+          Value: aclPrivateSubs
 
+  myPrivate2aSubnetNetworkAclAssociation:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId:
+        Ref: subPrivate2a
+      NetworkAclId:
+        Ref: aclPrivateSubs
+  myPrivate2bSubnetNetworkAclAssociation:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId:
+        Ref: subPrivate2b
+      NetworkAclId:
+        Ref: aclPrivateSubs
+
+
+#OUTPUTS
 Outputs:
   StackVPC:
     Description: 'The ID of the VPC'
@@ -123,12 +222,36 @@ Outputs:
   
   PublicSub2a:
     Description: 'The ID of the Public Subnet 2a'
-    Value: !Ref subPublic1a
+    Value: !Ref subPublic2a
     Export: 
-      Name: !Sub "${AWS::StackName}-Pubsubnet1a"
+      Name: !Sub "${AWS::StackName}-Pubsubnet2a"
 
   PublicSub2b:
     Description: 'The ID of the Public Subnet 2b'
-    Value: !Ref subPublic1b
+    Value: !Ref subPublic2b
     Export: 
-      Name: !Sub "${AWS::StackName}-Pubsubnet1b"
+      Name: !Sub "${AWS::StackName}-Pubsubnet2b"
+
+  PrivateSub2a:
+    Description: 'The ID of the Private Subnet 2a'
+    Value: !Ref subPrivate2a
+    Export: 
+      Name: !Sub "${AWS::StackName}-Privatesubnet2a"
+
+  PrivateSub2b:
+    Description: 'The ID of the Private Subnet 2b'
+    Value: !Ref subPrivate2b
+    Export: 
+      Name: !Sub "${AWS::StackName}-Privatesubnet2b"
+
+  aclPublicSubs:
+    Description: 'The ID of the Public Subnets ACL'
+    Value: !Ref aclPublicSubs
+    Export:
+      Name: !Sub "${AWS::StackName}-aclPublicSubs"
+
+  aclPrivateSubs:
+    Description: 'The ID of the Private Subnets ACL'
+    Value: !Ref aclPrivateSubs
+    Export:
+      Name: !Sub "${AWS::StackName}-aclPrivateSubs"
