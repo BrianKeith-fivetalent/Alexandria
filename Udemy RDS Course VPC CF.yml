@@ -37,6 +37,82 @@ Resources:
         - Key: Purpose
           Value: 'Build a VPC for RDS course'
 
+#CREATE SUBNETS
+  subPublic1a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: myRDSVPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: "us-west-2a"
+      Tags:
+      - Key: name
+        Value: subPublic2a
+
+  subPublic1b:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: myRDSVPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: "us-west-2b"
+      Tags:
+      - Key: name
+        Value: subPublic2b
+  
+#CREATE INTERNET GATEWAY
+  igwInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: name
+        Value: igwInternetGateway
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId:
+        Ref: myRDSVPC
+      InternetGatewayId:
+        Ref: igwInternetGateway 
+
+#CREATE ROUTE TABLE and ROUTES
+  rtbMainRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:  
+        Ref: myRDSVPC
+      Tags:
+      - Key: name
+        Value: rtbMainRouteTable
+
+  myRoute:
+    Type: AWS::EC2::Route
+    #DependsOn: GatewayToInternet
+    Properties:
+       RouteTableId:
+         Ref: rtbMainRouteTable
+       DestinationCidrBlock: 0.0.0.0/0
+       GatewayId:
+         Ref: igwInternetGateway
+
+  mySubnetRouteTableAssociation2a:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: subPublic1a
+      RouteTableId:
+        Ref: rtbMainRouteTable
+
+  mySubnetRouteTableAssociation2b:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: subPublic2b
+      RouteTableId:
+        Ref: rtbMainRouteTable
+
+
+
 
 Outputs:
   StackVPC:
@@ -44,4 +120,15 @@ Outputs:
     Value: !Ref myRDSVPC
     Export:
       Name: !Sub "${AWS::StackName}-MyRDS-VPCID"
-    
+  
+  PublicSub2a:
+    Description: 'The ID of the Public Subnet 2a'
+    Value: !Ref subPublic1a
+    Export: 
+      Name: !Sub "${AWS::StackName}-Pubsubnet1a"
+
+  PublicSub2b:
+    Description: 'The ID of the Public Subnet 2b'
+    Value: !Ref subPublic1b
+    Export: 
+      Name: !Sub "${AWS::StackName}-Pubsubnet1b"
