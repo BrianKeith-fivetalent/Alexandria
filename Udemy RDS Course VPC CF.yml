@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "YMAL string"
+# --------------------------------------------------------------------------------------
+#- Author: Brian Keith
+#- Date: 10 OCT 2019
+#- Name: get_AWSInventory.ps1
+#- Description: List various AWS resources in a given account
+#- Version: 0.1
+#- Purpose: Recon! What are we dealing with
+#----------------------------------------------------------------------------------------- 
+
+# Metadata: 
+
+# Parameters:
+  # varRegion: us-west-2 
+
+# Mappings: 
+
+# Conditions: 
+
+# Transform: 
+
+Resources: 
+#CREATE VPC
+  myRDSVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: 'false'
+      EnableDnsHostnames: 'false'
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: myRDSVPC
+        - Key: FTSArchitect
+          Value: 'Brian Keith'
+        - Key: Purpose
+          Value: 'Build a VPC for RDS course'
+
+
+Outputs:
+  StackVPC:
+    Description: 'The ID of the VPC'
+    Value: !Ref myRDSVPC
+    Export:
+      Name: !Sub "${AWS::StackName}-MyRDS-VPCID"
+    
