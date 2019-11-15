@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "YMAL string"
+Description: "Create security Groups"
 # --------------------------------------------------------------------------------------
 #- Author: Brian Keith
 #- Date: 14 Nov 2019
@@ -40,24 +40,35 @@ Resources:
           "Fn::ImportValue": 
             "Fn::Sub": "${NetworkStackName}-MyRDS-VPCID"
         SecurityGroupIngress:
-        - IpProtocol: tcp
+        - 
+          IpProtocol: tcp
           FromPort: 1521
           ToPort: 1521
-          CidrIp: 0.0.0.0/0
-        SecurityGroupIngress:
-        - IpProtocol: tcp
+          CidrIp: "0.0.0.0/0"
+        - 
+          IpProtocol: tcp
           FromPort: 1433
           ToPort: 1433
-          CidrIp: 0.0.0.0/0
-        SecurityGroupIngress:
-        - IpProtocol: tcp
+          CidrIp: "0.0.0.0/0"
+        - 
+          IpProtocol: tcp
           FromPort: 3306
           ToPort: 3306
-          CidrIp: 0.0.0.0/0
+          CidrIp: "0.0.0.0/0"
+        - 
+          IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp: "0.0.0.0/0"
         # SecurityGroupEgress:
         # - IpProtocol: tcp
         #   FromPort: -1
         #   ToPort: -1
         #   CidrIp: 0.0.0.0/0
 
-# Outputs: 
+Outputs: 
+  sgRDSsecurityGroup:
+    Description: 'The ID of the RDS Security Group'
+    Value: !Ref sgRDSsecurityGroup
+    Export:
+      Name: !Sub "${AWS::StackName}-sgRDSsecurityGroupId"
