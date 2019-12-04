@@ -249,7 +249,7 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-        - https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-compliance-common/templates/nat-instance.template
+        - https://bk-hipaastack-bucket.s3-us-west-1.amazonaws.com/CFtemplates/submodules/nat-instance.template
         - QSS3Region:
             !If
             - cGovCloudCondition

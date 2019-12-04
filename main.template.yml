@@ -2,6 +2,16 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Provides nesting for required stacks to deploy a full sample web application
   with reverse proxy, ELBs, IAM, and other resources (for demonstration/POC/testing)
+# --------------------------------------------------------------------------------------
+#- Author: Brian Keith
+#- Date:  04 DEC 2019
+#- Name: main.template.yml
+#- Description: Used with the AWS Referance Architecture for HIPAA
+#- Version: 0.1
+#- Purpose: Deploy various resources to setup a demonstration HIPAA complient infrastructure
+# 
+# Web Link: https://aws.amazon.com/quickstart/architecture/compliance-hipaa/
+#----------------------------------------------------------------------------------------- 
 Metadata:
   Stack:
     Value: 0
@@ -265,7 +275,7 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-        - https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-compliance-common/templates/iam.template
+        - https://bk-hipaastack-bucket.s3-us-west-1.amazonaws.com/CFtemplates/submodules/iam.template.yml
         - QSS3Region:
             !If
             - GovCloudCondition
@@ -277,7 +287,7 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-        - https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-compliance-common/templates/logging.template
+        - https://bk-hipaastack-bucket.s3-us-west-1.amazonaws.com/CFtemplates/submodules/logging.template
         - QSS3Region:
             !If
             - GovCloudCondition
@@ -296,7 +306,7 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-        - https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-compliance-common/templates/vpc-production.template
+        - https://bk-hipaastack-bucket.s3-us-west-1.amazonaws.com/CFtemplates/submodules/vpc-production.template
         - QSS3Region:
             !If
             - GovCloudCondition
@@ -345,7 +355,7 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-        - https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-compliance-common/templates/vpc-management.template
+        - https://bk-hipaastack-bucket.s3-us-west-1.amazonaws.com/CFtemplates/submodules/vpc-management.template
         - QSS3Region:
             !If
             - GovCloudCondition
@@ -421,7 +431,7 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-        - https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-compliance-common/templates/config-rules.template
+        - https://bk-hipaastack-bucket.s3-us-west-1.amazonaws.com/CFtemplates/submodules/config-rules.template
         - QSS3Region:
             !If
             - GovCloudCondition
@@ -440,7 +450,7 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-        - https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}templates/application.template
+        - https://bk-hipaastack-bucket.s3-us-west-1.amazonaws.com/CFtemplates/submodules/application.template
         - QSS3Region:
             !If
             - GovCloudCondition
