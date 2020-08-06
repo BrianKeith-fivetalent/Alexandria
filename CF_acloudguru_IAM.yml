@@ -52,7 +52,7 @@ Resources:
           Version: '2012-10-17'
           Statement:
           - Effect: Allow
-            Action: "*",
+            Action: "*"
             Resource: "*"
       RoleName:
         Fn::Sub: "${AppName}-${AppEnvironmentName}-codepipeline-service-role"
