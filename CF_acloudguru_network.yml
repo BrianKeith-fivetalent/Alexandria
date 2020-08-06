@@ -1,0 +1,192 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "VPC with 3 public and 3 private subnets, IGW, NAT Gateway and supporting routes and secruity groups"
+# ----------------------------------------------------------------------------------------
+# - Author: Brian Keith
+# - Date: 05 AUG 2020
+# - Name: CF_acloudguru_IAM.yml
+# - Title: VPC Network Infrastructure
+# - Version: 0.1
+# - Purpose: Creates VPC with various network components
+# -
+# - ASSUMPTIONS: no prior dependencies for verison 0.1
+# - 
+# ----------------------------------------------------------------------------------------- 
+
+
+
+
+
+Parameters:
+  CidrBlock:
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Default: 10.0.0.0/16
+    Description: VPC CIDR Block (eg 10.0.0.0/16)
+    Type: String
+  AvailabilityZone1:
+    Description: The AvailabilityZone to use for the first subnet
+    Type: AWS::EC2::AvailabilityZone::Name
+  AvailabilityZone2:
+    Description: The AvailabilityZone to use for the second subnet
+    Type: AWS::EC2::AvailabilityZone::Name
+  AvailabilityZone3:
+    Description: The AvailabilityZone to use for the third subnet
+    Type: AWS::EC2::AvailabilityZone::Name
+  PublicSubnetACIDR:
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Default: 10.0.1.0/24
+    Description: VPC CIDR Block for the Public Subnet A(eg 10.0.0.0/24)
+    Type: String
+  PublicSubnetBCIDR:
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Default: 10.0.2.0/24
+    Description: VPC CIDR Block for the Public Subnet B(eg 10.0.0.0/24)
+    Type: String
+  PublicSubnetCCIDR:
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Default: 10.0.3.0/24
+    Description: VPC CIDR Block for the Public Subnet C(eg 10.0.0.0/24)
+    Type: String
+  PrivateSubnetACIDR:
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Default: 10.0.10.0/24
+    Description: VPC CIDR Block for the Private Subnet A(eg 10.0.0.0/24)
+    Type: String
+  PrivateSubnetBCIDR:
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Default: 10.0.11.0/24
+    Description: VPC CIDR Block for the Private Subnet B(eg 10.0.0.0/24)
+    Type: String
+  PrivateSubnetCCIDR:
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Default: 10.0.12.0/24
+    Description: VPC CIDR Block for the Private Subnet C(eg 10.0.0.0/24)
+    Type: String
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref CidrBlock
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone1
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnetACIDR
+      MapPublicIpOnLaunch: true
+  PublicSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone2
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnetBCIDR
+      MapPublicIpOnLaunch: true
+  PublicSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone3
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnetCCIDR
+      MapPublicIpOnLaunch: true
+
+  PrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone1
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnetACIDR
+      MapPublicIpOnLaunch: false
+  PrivateSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone2
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnetBCIDR
+      MapPublicIpOnLaunch: false
+  PrivateSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone3
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnetCCIDR
+      MapPublicIpOnLaunch: false
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  InternetGatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  EIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt EIP.AllocationId
+      SubnetId: !Ref PublicSubnetA
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  InternetRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnetA
+  PublicSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnetB
+  PublicSubnetCRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnetC
+
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  NATRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref PrivateSubnetA
+  PrivateSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref PrivateSubnetB
+  PrivateSubnetCRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref PrivateSubnetC
