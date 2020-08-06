@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "IAM Template for various security roles"
+# ----------------------------------------------------------------------------------------
+# - Author: Brian Keith
+# - Date: 05 AUG 2020
+# - Name: CF_acloudguru_IAM.yml
+# - Title: IAM Security Roles
+# - Version: 0.1
+# - Purpose: creates various AWS IAM roles for later cloudformation
+# -
+# ----------------------------------------------------------------------------------------- 
+
+
+
+Parameters:
+  AppName:
+    Default: ACGmarketing
+    Description: Name of the application, will be part of prefix naming convention
+    Type: String
+  AppEnvironmentName:
+    Default: Stage
+    Description: Environment - PROD, Stage, Dev - will be part of prefix naming convention
+    Type: String
+
+Resources:
+  codeBuildRole:
+  #This role will be used to create the CodeBuild Pipeline
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument: '{"Version":"2012-10-17","Statement":{"Effect":"Allow","Principal":{"Service":"codebuild.amazonaws.com"},"Action":"sts:AssumeRole"}}'
+      Path: "/"
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action: "*"
+            Resource: "*"
+      RoleName:
+        Fn::Sub: "${AppName}-${AppEnvironmentName}-codebuild-service-role"
+
+
+
+Outputs:
+  codeBuildRole:
+    Description: Role for use with CodeBuilder
+    Value: !Ref codeBuildRole
