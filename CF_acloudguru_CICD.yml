@@ -1,0 +1,346 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation Template to Build a CI/CD Solution For Serverless Project
+  in NodeJs.
+# ----------------------------------------------------------------------------------------
+# - Author: Brian Keith
+# - Date: 06 AUG 2020
+# - Name: CF_acloudguru_IAM.yml
+# - Title: VPC Network Infrastructure
+# - Version: 0.1
+# - Purpose: Creates VPC with various network components
+# -
+# - ASSUMPTIONS: Run the following first
+# -         CF_acloudguru_IAM.yml
+# -         CF_acloudguru_network.yml
+# - 
+# ----------------------------------------------------------------------------------------- 
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Application Configuration
+      Parameters:
+      - AppName
+      - AppRegionName
+      - AppEnvironmentName
+    - Label:
+        default: Repository Configuration
+      Parameters:
+      - GitRepositorySourceName
+      - GitRepositoryName
+      - GitRepositoryBranchName
+    - Label:
+        default: GitHub Configuration
+      Parameters:
+      - GitHubOAuthToken
+      - GitHubOwner
+    ParameterLabels:
+      AppName:
+        default: Name
+      AppRegionName:
+        default: Region
+      AppEnvironmentName:
+        default: Environment
+      GitRepositorySourceName:
+        default: Source Name
+      GitRepositoryName:
+        default: Repository Name
+      GitRepositoryBranchName:
+        default: Branch Name
+      GitHubOAuthToken:
+        default: GitHub OAuth Token
+      GitHubOwner:
+        default: GitHub Owner
+Parameters:
+  AppName:
+    Description: Name of The App (this will be used for all recource)
+    Type: String
+    MinLength: '1'
+    MaxLength: '100'
+    AllowedPattern: "[A-Za-z0-9-_]+"
+    ConstraintDescription: Value can only be 100 characters long and contain lower
+      case letters, numbers and dashes(-)
+  AppRegionName:
+    Description: Name of Region for the App (us-west-2, us-east-1, https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html)
+    Type: String
+    Default: us-west-1
+    AllowedValues:
+    - us-east-2
+    - us-east-1
+    - us-west-1
+    - us-west-2
+    - ap-northeast-1
+    - ap-northeast-2
+    - ap-northeast-3
+    - ap-south-1
+    - ap-southeast-1
+    - ap-southeast-2
+    - ca-central-1
+    - cn-north-1
+    - cn-northwest-1
+    - eu-central-1
+    - eu-west-1
+    - eu-west-2
+    - eu-west-3
+    - sa-east-1
+    ConstraintDescription: Must be a valid region - https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
+  AppEnvironmentName:
+    Description: Environment Name (this will be used for all resources. e.g. {AppName}.{AppEnvironment}.codebuild,
+      etc)
+    Type: String
+    Default: dev
+    AllowedValues:
+    - production
+    - prod
+    - staging
+    - qa
+    - development
+    - dev
+    - preprod
+    - sandbox
+    - develop
+    ConstraintDescription: Must be production, prod, staging, qa, development, dev,
+      preprod, sandbox, develop
+  GitRepositorySourceName:
+    Description: CODECOMMIT or GITHUB
+    Type: String
+    Default: GITHUB
+    AllowedValues:
+    - CODECOMMIT
+    - GITHUB
+    ConstraintDescription: Must be CODECOMMIT or GITHUB
+  GitRepositoryName:
+    Description: Repository Name
+    Type: String
+    MinLength: '1'
+    MaxLength: '200'
+    AllowedPattern: "[A-Za-z0-9-]+"
+    ConstraintDescription: Value can only be 50 characters long and contain letters,
+      numbers or dashes(-)
+  GitRepositoryBranchName:
+    Description: Branch used for detecting changes and starting the CI/CD process
+    Type: String
+    MinLength: '1'
+    MaxLength: '200'
+    AllowedPattern: "[A-Za-z0-9-_]+"
+    ConstraintDescription: Value can only be 100 characters long and contain letters,
+      numbers or dashes(-)
+  GitHubOAuthToken:
+    Description: Create a token with 'repo' and 'admin:repo_hook' permissions here
+      https://github.com/settings/tokens
+    Type: String
+  GitHubOwner:
+    Description: Enter GitHub username of the repository owner
+    Type: String
+  codeBuildRoleARN:
+    Description: Enter arn of the role with codeBuild privileges
+    Type: String
+    Default: 610811168002:role/ACGmarketing-DEV-codebuild-service-role
+  codePipelineRoleARN:
+    Description: Enter arn of the role with codePipeline privileges
+    Type: String
+    Default: 610811168002:role/ACGmarketing-DEV-codepipeline-service-role
+
+
+Mappings: {}
+Conditions:
+  IsCodeCommit:
+    Fn::Equals:
+    - Ref: GitRepositorySourceName
+    - CODECOMMIT
+  IsGitHub:
+    Fn::Equals:
+    - Ref: GitRepositorySourceName
+    - GITHUB
+Resources:
+  codeBuildArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        Fn::Sub: "${AppName}-${AppEnvironmentName}-cicd"
+
+  ### NOTE: all roles moved to CF_acloudguru_IAM.yml      
+  # codeBuildRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     AssumeRolePolicyDocument: '{"Version":"2012-10-17","Statement":{"Effect":"Allow","Principal":{"Service":"codebuild.amazonaws.com"},"Action":"sts:AssumeRole"}}'
+  #     Path: "/"
+  #     Policies:
+  #     - PolicyName: root
+  #       PolicyDocument:
+  #         Version: '2012-10-17'
+  #         Statement:
+  #         - Effect: Allow
+  #           Action: "*"
+  #           Resource: "*"
+  #     RoleName:
+  #       Fn::Sub: "${AppName}-${AppEnvironmentName}-codebuild-service-role"
+  # codePipelineRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     AssumeRolePolicyDocument: '{"Version":"2012-10-17","Statement":{"Effect":"Allow","Principal":{"Service":"codepipeline.amazonaws.com"},"Action":"sts:AssumeRole"}}'
+  #     Path: "/"
+  #     Policies:
+  #     - PolicyName: root
+  #       PolicyDocument:
+  #         Version: '2012-10-17'
+  #         Statement:
+  #         - Effect: Allow
+  #           Action: "*"
+  #           Resource: "*"
+  #     RoleName:
+  #       Fn::Sub: "${AppName}-${AppEnvironmentName}-codepipeline-service-role"
+  #   DependsOn: codeBuildRole
+  codeBuildGitHub:
+    Type: AWS::CodeBuild::Project
+    Condition: IsGitHub
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Description:
+        Fn::Sub: "${AppName} ${AppEnvironmentName} Fargate CodeBuld"
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/amazonlinux2-x86_64-standard:latest
+        Type: LINUX_CONTAINER
+        PrivilegedMode: true
+      Name:
+        Fn::Sub: "${AppName}-fg-codebuild-${AppEnvironmentName}"
+      ServiceRole:
+        Ref: codeBuildRoleARN
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec:
+          Fn::Sub: buildspecs/buildspec.${AppEnvironmentName}.yml
+#    DependsOn: codePipelineRole
+  codePipelineGitHub:
+    Type: AWS::CodePipeline::Pipeline
+    Condition: IsGitHub
+    Properties:
+      ArtifactStore:
+        Type: S3
+        Location:
+          Ref: codeBuildArtifactBucket
+      Name:
+        Fn::Sub: "${AppName}-nodejs-codepipeline-${AppEnvironmentName}"
+      RestartExecutionOnUpdate: false
+      RoleArn:
+        Ref: codePipelineRoleARN
+      Stages:
+      - Name: Source
+        Actions:
+        - ActionTypeId:
+            Category: Source
+            Owner: ThirdParty
+            Provider: GitHub
+            Version: '1'
+          Configuration:
+            Owner:
+              Ref: GitHubOwner
+            Repo:
+              Ref: GitRepositoryName
+            Branch:
+              Ref: GitRepositoryBranchName
+            OAuthToken:
+              Ref: GitHubOAuthToken
+          Name: GitHub
+          OutputArtifacts:
+          - Name: Source
+          RunOrder: 1
+      - Name: Build
+        Actions:
+        - ActionTypeId:
+            Category: Build
+            Owner: AWS
+            Provider: CodeBuild
+            Version: '1'
+          Configuration:
+            ProjectName:
+              Ref: codeBuildGitHub
+          Name: Build
+          InputArtifacts:
+          - Name: Source
+          OutputArtifacts:
+          - Name: MyAppBuild
+          RunOrder: 3
+    DependsOn:
+    - codeBuildGitHub
+#    - codePipelineRole
+    - codeBuildArtifactBucket
+  codeBuildCodeCommit:
+    Type: AWS::CodeBuild::Project
+    Condition: IsCodeCommit
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description:
+        Fn::Sub: "${AppName} ${AppEnvironmentName} nodejs CodeBuld"
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/nodejs:7.0.0
+        Type: LINUX_CONTAINER
+      Name:
+        Fn::Sub: "${AppName}-nodejs-codebuild-${AppEnvironmentName}"
+      ServiceRole:
+        Ref: codeBuildRoleARN
+      Source:
+        Location:
+          Fn::Sub: https://git-codecommit.${AppRegionName}.amazonaws.com/v1/repos/${GitRepositoryName}
+        Type:
+          Ref: GitRepositorySourceName
+        BuildSpec:
+          Fn::Sub: buildspecs/buildspec.${AppEnvironmentName}.yml
+#    DependsOn: codePipelineRole
+  codePipelineCodeCommit:
+    Type: AWS::CodePipeline::Pipeline
+    Condition: IsCodeCommit
+    Properties:
+      ArtifactStore:
+        Type: S3
+        Location:
+          Ref: codeBuildArtifactBucket
+      Name:
+        Fn::Sub: "${AppName}-nodejs-codepipeline-${AppEnvironmentName}"
+      RestartExecutionOnUpdate: false
+      RoleArn:
+        Ref: codePipelineRoleARN
+      Stages:
+      - Name: Source
+        Actions:
+        - ActionTypeId:
+            Category: Source
+            Owner: AWS
+            Provider: CodeCommit
+            Version: '1'
+          Configuration:
+            BranchName:
+              Ref: GitRepositoryBranchName
+            GitRepositoryName:
+              Ref: GitRepositoryName
+          Name: Source
+          OutputArtifacts:
+          - Name: Source
+          RunOrder: 1
+      - Name: Build
+        Actions:
+        - ActionTypeId:
+            Category: Build
+            Owner: AWS
+            Provider: CodeBuild
+            Version: '1'
+          Configuration:
+            ProjectName:
+              Ref: codeBuildCodeCommit
+          Name: Build
+          InputArtifacts:
+          - Name: Source
+          OutputArtifacts:
+          - Name: MyAppBuild
+          RunOrder: 3
+    DependsOn:
+    - codeBuildCodeCommit
+#    - codePipelineRole
+    - codeBuildArtifactBucket
+Outputs: {}
