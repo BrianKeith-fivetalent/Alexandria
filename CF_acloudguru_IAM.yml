@@ -44,7 +44,7 @@ Resources:
   #This role will be used with the Code Pipeline
     Type: AWS::IAM::Role
     Properties:
-      AssumeRolePolicyDocument: '{"Version":"2012-10-17","Statement":{"Effect":"Allow","Principal":{"Service":"codepipeline.amazonaws.com"},"Action":"sts:AssumeRole\}}'
+      AssumeRolePolicyDocument: '{"Version":"2012-10-17","Statement":{"Effect":"Allow","Principal":{"Service":"codepipeline.amazonaws.com"},"Action":"sts:AssumeRole"}}'
       Path: "/"
       Policies:
       - PolicyName: root
@@ -56,10 +56,13 @@ Resources:
             Resource: "*"
       RoleName:
         Fn::Sub: "${AppName}-${AppEnvironmentName}-codepipeline-service-role"
-      DependsOn: "codeBuildRole"
+    DependsOn: "codeBuildRole"
 
 
 Outputs:
   codeBuildRole:
     Description: Role for use with CodeBuilder
     Value: !Ref codeBuildRole
+  codePipelineRole:
+    Description: Role for use with codePipelineRole
+    Value: !Ref codePipelineRole
