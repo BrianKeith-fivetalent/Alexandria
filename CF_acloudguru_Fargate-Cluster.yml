@@ -1,5 +1,19 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: The CloudFormation template for the Fargate ECS Cluster.
+# ----------------------------------------------------------------------------------------
+# - Author: Brian Keith
+# - Date: 06 AUG 2020
+# - Name: CF_acloudguru_Fargate-Cluster.yml
+# - Title: Fargate
+# - Version: 0.1
+# - Purpose: Creates an ecs Fargate Cluster
+# -
+# - ASSUMPTIONS: Run the following first
+# -         CF_acloudguru_IAM.yml
+# -         CF_acloudguru_network.yml
+# -         CF_acloudguru_CICD.yml
+# - 
+# ----------------------------------------------------------------------------------------- 
 
 Parameters:
   AppName:

@@ -1,0 +1,136 @@
+AWSTemplateFormatVersion: 2010 - 09 - 09
+# ----------------------------------------------------------------------------------------
+# - Author: Brian Keith
+# - Date: 06 AUG 2020
+# - Name: CF_acloudguru_cloudfront.yml
+# - Title: Cloudfront Distribution
+# - Version: 0.1
+# - Purpose: Creates a cloudfront distribution
+# -
+# - ASSUMPTIONS: Run the following first
+# -         CF_acloudguru_IAM.yml
+# -         CF_acloudguru_network.yml
+# - 
+# ----------------------------------------------------------------------------------------- 
+
+Resources:
+    distd562cicb76a12cloudfrontnet:
+    Type: 'AWS::CloudFront::Distribution'
+Properties:
+    DistributionConfig:
+    Aliases:
+    -prod.mkg.acloudguru.com
+Enabled: true
+PriceClass: PriceClass_All
+CacheBehaviors:
+    -TargetOriginId: Custom - prod.mkg.acloudguru.com
+PathPattern: wp - admin
+    /*
+                ViewerProtocolPolicy: redirect-to-https
+                MinTTL: 0
+                AllowedMethods:
+                  - HEAD
+                  - DELETE
+                  - POST
+                  - GET
+                  - OPTIONS
+                  - PUT
+                  - PATCH
+                CachedMethods:
+                  - HEAD
+                  - GET
+                ForwardedValues:
+                  Headers:
+                    - '*'
+                  Cookies:
+                    Forward: none
+              - TargetOriginId: Custom-prod.mkg.acloudguru.com
+                PathPattern: wp-login.php
+                ViewerProtocolPolicy: redirect-to-https
+                MinTTL: 0
+                AllowedMethods:
+                  - HEAD
+                  - DELETE
+                  - POST
+                  - GET
+                  - OPTIONS
+                  - PUT
+                  - PATCH
+                CachedMethods:
+                  - HEAD
+                  - GET
+                ForwardedValues:
+                  Headers:
+                    - '*'
+                  Cookies:
+                    Forward: none
+              - TargetOriginId: Custom-prod.mkg.acloudguru.com
+                PathPattern: login/*
+                ViewerProtocolPolicy: redirect-to-https
+                MinTTL: 0
+                AllowedMethods:
+                  - HEAD
+                  - DELETE
+                  - POST
+                  - GET
+                  - OPTIONS
+                  - PUT
+                  - PATCH
+                CachedMethods:
+                  - HEAD
+                  - GET
+                ForwardedValues:
+                  QueryString: true
+                  Headers:
+                    - Origin
+                    - Host
+                  Cookies:
+                    Forward: all
+            DefaultCacheBehavior:
+              TargetOriginId: Custom-prod.mkg.acloudguru.com
+              ViewerProtocolPolicy: redirect-to-https
+              MinTTL: 0
+              AllowedMethods:
+                - HEAD
+                - DELETE
+                - POST
+                - GET
+                - OPTIONS
+                - PUT
+                - PATCH
+              CachedMethods:
+                - HEAD
+                - GET
+                - OPTIONS
+              ForwardedValues:
+                QueryString: true
+                Headers:
+                  - Options
+                  - Host
+                Cookies:
+                  Forward: whitelist
+                  WhiteListedNames:
+                    - PHPSESSID
+                    - comment_author_*
+                    - comment_author_email_*
+                    - comment_author_url_*
+                    - wordpress_*
+                    - wordpress_logged_in_*
+                    - wordpress_sec_*
+                    - wordpress_test_cookie
+                    - wp-settings-*
+            Origins:
+              - DomainName: fg-acg-production-alb-301471324.us-west-2.elb.amazonaws.com
+                Id: Custom-prod.mkg.acloudguru.com
+                S3OriginConfig:
+                  HTTPPort: '80'
+                  HTTPSPort: '443'
+                  OriginProtocolPolicy: https-only
+            Restrictions:
+              GeoRestriction:
+                RestrictionType: none
+                Locations: []
+            ViewerCertificate:
+              SslSupportMethod: sni-only
+              MinimumProtocolVersion: TLSv1.2_2018
+    Description: info
