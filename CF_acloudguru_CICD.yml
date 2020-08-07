@@ -114,6 +114,7 @@ Parameters:
   GitRepositoryName:
     Description: Repository Name
     Type: String
+    Default: Alexandria
     MinLength: '1'
     MaxLength: '200'
     AllowedPattern: "[A-Za-z0-9-]+"
@@ -122,6 +123,7 @@ Parameters:
   GitRepositoryBranchName:
     Description: Branch used for detecting changes and starting the CI/CD process
     Type: String
+    Default: FTS-acloudguru
     MinLength: '1'
     MaxLength: '200'
     AllowedPattern: "[A-Za-z0-9-_]+"
@@ -137,11 +139,12 @@ Parameters:
   codeBuildRoleARN:
     Description: Enter arn of the role with codeBuild privileges
     Type: String
-    Default: 610811168002:role/ACGmarketing-DEV-codebuild-service-role
+    Default: arn:aws:iam::610811168002:role/ACGmarketing-DEV-codebuild-service-role
   codePipelineRoleARN:
     Description: Enter arn of the role with codePipeline privileges
     Type: String
-    Default: 610811168002:role/ACGmarketing-DEV-codepipeline-service-role
+    Default: arn:aws:iam::610811168002:role/ACGmarketing-DEV-codepipeline-service-role
+    AllowedPattern: arn:aws(-[\w]+)*:iam::[0-9]{12}:role/.*
 
 
 Mappings: {}

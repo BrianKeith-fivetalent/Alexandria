@@ -21,6 +21,38 @@ Parameters:
     Default: Stage
     Description: Environment - PROD, Stage, Dev - will be part of prefix naming convention
     Type: String
+    Default: dev
+    AllowedValues:
+    - production
+    - prod
+    - staging
+    - qa
+    - development
+    - dev
+    - preprod
+    - sandbox
+    - develop
+    ConstraintDescription: Must be production, prod, staging, qa, development, dev,
+      preprod, sandbox, develop
+
+#   GitRepositorySourceName:
+#     Description: CODECOMMIT or GITHUB
+#     Type: String
+#     Default: GITHUB
+#     AllowedValues:
+#     - CODECOMMIT
+#     - GITHUB
+#     ConstraintDescription: Must be CODECOMMIT or GITHUB
+
+# Conditions:
+#   IsCodeCommit:
+#     Fn::Equals:
+#     - Ref: GitRepositorySourceName
+#     - CODECOMMIT
+#   IsGitHub:
+#     Fn::Equals:
+#     - Ref: GitRepositorySourceName
+#     - GITHUB
 
 Resources:
   codeBuildRole:
