@@ -1,0 +1,258 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: The CloudFormation template for the Fargate ECS Cluster.
+
+Parameters:
+  AppName:
+    Description: Name of The App (this will be used for all recource)
+    Type: String
+    MinLength: '1'
+    MaxLength: '100'
+    AllowedPattern: "[A-Za-z0-9-_]+"
+    ConstraintDescription: Value can only be 100 characters long and contain lower
+      case letters, numbers and dashes(-)
+    Default: acgmarketing
+  AppEnvironmentName:
+    Description: Environment Name (this will be used for all resources. e.g. {AppName}.{AppEnvironment}.codebuild,
+      etc)
+    Type: String
+    Default: dev
+    AllowedValues:
+    - production
+    - prod
+    - staging
+    - qa
+    - development
+    - dev
+    - preprod
+    - sandbox
+    - develop
+    ConstraintDescription: Must be production, prod, staging, qa, development, dev,
+      preprod, sandbox, develop
+  ContainerPort:
+    Type: Number
+    Default: 8085
+  ImageURI:
+    Type: String
+  ecsExecutionRoleARN:
+    Description: Enter arn of the role with ecs admin privileges
+    Type: String
+    Default: arn:aws:iam::610811168002:role/acgmarketing-dev-ecs-execution-role
+    AllowedPattern: arn:aws(-[\w]+)*:iam::[0-9]{12}:role/.*
+  TargetVPC:
+    Type: AWS::EC2::VPC::Id
+    Description: The target VPC for ecsDeployment
+  TargetSubnetA:
+    Type: AWS::EC2::Subnet::Id
+    Description: The first subnet for the load balancer
+  TargetSubnetB:
+    Type: AWS::EC2::Subnet::Id
+    Description: The second subnet for the load balancer
+
+
+Resources:
+
+  # Create an ECS Cluster
+  Cluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: 
+        Fn::Sub: "${AppName}-${AppEnvironmentName}-ecs-Cluster"
+
+
+  
+  # Create a TaskDefinition with container details
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties: 
+      Memory: 1024
+      Cpu: 512
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - 'FARGATE'
+      TaskRoleArn: !Ref ecsExecutionRoleARN
+      ExecutionRoleArn: !Ref ecsExecutionRoleARN
+      ContainerDefinitions:
+        - Name: 
+          Fn::Sub: "${AppName}-${AppEnvironmentName}-container"
+        #!Join ['-', [!Ref Stage, !Ref 'AWS::AccountId', 'Container']]
+          Image: !Ref ImageURI
+          PortMappings:
+            - ContainerPort: !Ref ContainerPort
+              HostPort: !Ref ContainerPort
+
+  # Creat a security group for load balancer and open port 80 in bound from internet
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: 
+        Fn::Sub: "${AppName}-${AppEnvironmentName}-LoadBalancerSecurityGroup"
+     # !Join ['-', [!Ref Stage, !Ref 'AWS::AccountId', 'LoadBalancerSecurityGroup']]
+      VpcId: !Ref TargetVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  # Creat a security group for Containers and open in bound Container port from Load balancer security group to the Container 
+  ContainerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: 
+        Fn::Sub: "${AppName}-${AppEnvironmentName}-ContainerSecurityGroup"
+ #     !Join ['-', [!Ref Stage, !Ref 'AWS::AccountId', 'ContainerSecurityGroup']]
+      VpcId: !Ref targetVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: !Ref ContainerPort
+          ToPort: !Ref ContainerPort
+          SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+
+  # Create a LoadBalancer and attach the Security group and Subnets
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties: 
+      IpAddressType: ipv4
+      Name: 
+        Fn::Sub: "${AppName}-${AppEnvironmentName}-LoadBalancer"
+      #!Join ['-', [!Ref Stage, !Ref 'AWS::AccountId', 'LoadBalancer']]
+      Scheme: internet-facing
+      SecurityGroups:
+        - !Ref LoadBalancerSecurityGroup
+      Subnets: 
+        - !Ref TargetSubnetA
+        - !Ref TargetSubnetB
+      Type: application
+
+  # Create a TargetGroup for HTTP port 80
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: 
+        Fn::Sub: "${AppName}-${AppEnvironmentName}-TargetGroup"
+      #!Join ['-', [!Ref Stage, !Ref 'AWS::AccountId', 'TargetGroup']]
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+      VpcId: !Ref TargetVPC
+
+  # Create a LoadBalancerListener and attach the TargetGroup and LoadBalancer
+  LoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions: 
+        - TargetGroupArn: !Ref TargetGroup
+          Type: forward
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  # Create an ECS Service and add created Cluster, TaskDefintion, Subnets, TargetGroup and SecurityGroup
+  ECSService:
+    Type: AWS::ECS::Service
+    DependsOn: LoadBalancerListener
+    Properties:
+      ServiceName: 
+        Fn::Sub: "${AppName}-${AppEnvironmentName}-ECSService"
+      #!Join ['-', [!Ref Stage, !Ref 'AWS::AccountId', 'ECSService']]
+      Cluster: !Ref Cluster
+      TaskDefinition: !Ref TaskDefinition
+      DesiredCount: 2
+      LaunchType: FARGATE
+      NetworkConfiguration: 
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets:
+            - !Ref TargetSubnetA
+            - !Ref TargetSubnetB
+          SecurityGroups:
+            - !Ref ContainerSecurityGroup
+      LoadBalancers:
+        - ContainerName: 
+          Fn::Sub: "${AppName}-${AppEnvironmentName}-Container"
+        #!Join ['-', [!Ref Stage, !Ref 'AWS::AccountId', 'Container']]
+          ContainerPort: !Ref ContainerPort
+          TargetGroupArn: !Ref TargetGroup
+
+
+Output: {}
+
+##NOTE - All networkresources moved to network CF template
+  # # Create a VPC
+  # VPC:
+  #   Type: AWS::EC2::VPC
+  #   Properties: 
+  #     CidrBlock: 172.10.0.0/16
+  #     EnableDnsHostnames: True
+  #     EnableDnsSupport: True
+
+  # # Create a Subnet
+  # SubnetA:
+  #   Type: AWS::EC2::Subnet
+  #   Properties:
+  #     CidrBlock: 172.10.1.0/24
+  #     VpcId: !Ref VPC
+  #     AvailabilityZone: !Join ['', [!Ref "AWS::Region", 'a']]
+
+  # # Create a Subnet
+  # SubnetB:
+  #   Type: AWS::EC2::Subnet
+  #   Properties:
+  #     CidrBlock: 172.10.2.0/24
+  #     VpcId: !Ref VPC
+  #     AvailabilityZone: !Join ['', [!Ref "AWS::Region", 'b']]
+
+  # # Create a route table to allow access to internet
+  # PublicRouteTable:
+  #   Type: AWS::EC2::RouteTable
+  #   Properties:
+  #     VpcId: !Ref VPC
+
+  # # Create a Route to allow access to internet using an internet gateway
+  # PublicRoute:
+  #   Type: AWS::EC2::Route
+  #   DependsOn: VPCInternetGatewayAttachment
+  #   Properties:
+  #     RouteTableId: !Ref PublicRouteTable
+  #     DestinationCidrBlock: 0.0.0.0/0
+  #     GatewayId: !Ref InternetGateway
+
+  # # Attach Public Route to SubnetA
+  # SubnetAPublicRouteAssociation:
+  #   Type: AWS::EC2::SubnetRouteTableAssociation
+  #   Properties: 
+  #     RouteTableId: !Ref PublicRouteTable
+  #     SubnetId: !Ref SubnetA
+
+  # # Attach Public Route to SubnetB
+  # SubnetBPublicRouteAssociation:
+  #   Type: AWS::EC2::SubnetRouteTableAssociation
+  #   Properties: 
+  #     RouteTableId: !Ref PublicRouteTable
+  #     SubnetId: !Ref SubnetB
+
+  # # Create an Internet Gateway
+  # InternetGateway:
+  #   Type: AWS::EC2::InternetGateway
+
+  # # Attach the internet gateway to the VPC
+  # VPCInternetGatewayAttachment:
+  #   Type: AWS::EC2::VPCGatewayAttachment
+  #   Properties: 
+  #     InternetGatewayId: !Ref InternetGateway
+  #     VpcId: !Ref VPC
+
+  # Create Access Role for ECS-Tasks
+  # NOTE: Moved to IAM CF Template
+  # ExecutionRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     RoleName: !Join ['-', [!Ref Stage, !Ref 'AWS::AccountId', 'ExecutionRole']]
+  #     AssumeRolePolicyDocument:
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Service: ecs-tasks.amazonaws.com
+  #           Action: 'sts:AssumeRole'
+  #     ManagedPolicyArns:
+  #       - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
