@@ -65,7 +65,7 @@ Parameters:
   AppRegionName:
     Description: Name of Region for the App (us-west-2, us-east-1, https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html)
     Type: String
-    Default: us-west-1
+    Default: us-east-1
     AllowedValues:
     - us-east-2
     - us-east-1
@@ -114,7 +114,7 @@ Parameters:
   GitRepositoryName:
     Description: Repository Name
     Type: String
-    Default: Alexandria
+    Default: school-public-gamma
     MinLength: '1'
     MaxLength: '200'
     AllowedPattern: "[A-Za-z0-9-]+"
@@ -123,7 +123,7 @@ Parameters:
   GitRepositoryBranchName:
     Description: Branch used for detecting changes and starting the CI/CD process
     Type: String
-    Default: FTS-acloudguru
+    Default: develop
     MinLength: '1'
     MaxLength: '200'
     AllowedPattern: "[A-Za-z0-9-_]+"
@@ -136,10 +136,12 @@ Parameters:
   GitHubOwner:
     Description: Enter GitHub username of the repository owner
     Type: String
+    Default: ACloudGuru
   codeBuildRoleARN:
     Description: Enter arn of the role with codeBuild privileges
     Type: String
-    Default: arn:aws:iam::610811168002:role/ACGmarketing-DEV-codebuild-service-role
+    Default: arn:aws:iam::610811168002:role/acgmarketing-dev-codebuild-service-role
+    AllowedPattern: arn:aws(-[\w]+)*:iam::[0-9]{12}:role/.*
   codePipelineRoleARN:
     Description: Enter arn of the role with codePipeline privileges
     Type: String
