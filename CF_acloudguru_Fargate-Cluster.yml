@@ -32,7 +32,9 @@ Parameters:
     Type: Number
     Default: 8085
   ImageURI:
+    #This is a placeholder - need to get correct URI
     Type: String
+    Default: "amazon/amazon-ecs-sample"
   ecsExecutionRoleARN:
     Description: Enter arn of the role with ecs admin privileges
     Type: String
@@ -64,23 +66,70 @@ Resources:
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties: 
-      Memory: 1024
-      Cpu: 512
-      NetworkMode: awsvpc
       RequiresCompatibilities:
-        - 'FARGATE'
-      TaskRoleArn: !Ref ecsExecutionRoleARN
-      ExecutionRoleArn: !Ref ecsExecutionRoleARN
-      ContainerDefinitions:
-        - Name: 
-          Fn::Sub: "${AppName}-${AppEnvironmentName}-container"
-        #!Join ['-', [!Ref Stage, !Ref 'AWS::AccountId', 'Container']]
-          Image: !Ref ImageURI
-          PortMappings:
-            - ContainerPort: !Ref ContainerPort
-              HostPort: !Ref ContainerPort
+        - "FARGATE"
+      ContainerDefinitions: 
+        - 
+          Name: "my-app"
+          MountPoints: 
+            - 
+              SourceVolume: "my-vol"
+              ContainerPath: "/var/www/my-vol"
+          Image: "amazon/amazon-ecs-sample"
+          Cpu: 10
+          EntryPoint: 
+            - "/usr/sbin/apache2"
+            - "-D"
+            - "FOREGROUND"
+          Memory: 0.5
+          #Essential: true
+        - 
+          Name: "busybox"
+          Image: "busybox"
+          Cpu: 10
+          EntryPoint: 
+            - "sh"
+            - "-c"
+          Memory: 0.5
+          Command: 
+            - "/bin/sh -c \"while true; do /bin/date > /var/www/my-vol/date; sleep 1; done\""
+          #Essential: false
+          DependsOn:
+            - ContainerName: my-app
+              Condition: START
+          VolumesFrom: 
+            - 
+              SourceContainer: "my-app"
+      Volumes: 
+        - 
+          Host: 
+            SourcePath: "/var/lib/docker/vfs/dir/"
+          Name: "my-vol"
 
-  # Creat a security group for load balancer and open port 80 in bound from internet
+
+
+    #   RequiresCompatibilities:
+    #     - 'FARGATE'
+    #   ContainerDefinitions:
+    #   - 
+    #     Name: "my-app"
+    #     Mount
+    #   Memory: 1024
+    #   Cpu: 512
+    #   NetworkMode: awsvpc
+
+    #   TaskRoleArn: !Ref ecsExecutionRoleARN
+    #   ExecutionRoleArn: !Ref ecsExecutionRoleARN
+    #   ContainerDefinitions:
+    #     - Name:
+    #     #    Fn::Sub: "${AppName}-${AppEnvironmentName}-container"
+    #     #!Join ['-', [!Ref Stage, !Ref 'AWS::AccountId', 'Container']]
+    #       Image: !Ref ImageURI
+    #       PortMappings:
+    #         - ContainerPort: !Ref ContainerPort
+    #           HostPort: !Ref ContainerPort
+
+  # Create a security group for load balancer and open port 80 in bound from internet
   LoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -101,7 +150,7 @@ Resources:
       GroupDescription: 
         Fn::Sub: "${AppName}-${AppEnvironmentName}-ContainerSecurityGroup"
  #     !Join ['-', [!Ref Stage, !Ref 'AWS::AccountId', 'ContainerSecurityGroup']]
-      VpcId: !Ref targetVPC
+      VpcId: !Ref TargetVPC
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: !Ref ContainerPort
@@ -169,13 +218,13 @@ Resources:
             - !Ref ContainerSecurityGroup
       LoadBalancers:
         - ContainerName: 
-          Fn::Sub: "${AppName}-${AppEnvironmentName}-Container"
+            Fn::Sub: "${AppName}-${AppEnvironmentName}-Container"
         #!Join ['-', [!Ref Stage, !Ref 'AWS::AccountId', 'Container']]
           ContainerPort: !Ref ContainerPort
           TargetGroupArn: !Ref TargetGroup
 
 
-Output: {}
+Outputs: {}
 
 ##NOTE - All networkresources moved to network CF template
   # # Create a VPC
