@@ -77,50 +77,95 @@ Resources:
 
   
   # Create a TaskDefinition with container details
-  TaskDefinition:
+  TaskDefinition01:
     Type: AWS::ECS::TaskDefinition
     Properties: 
-      RequiresCompatibilities:
-        - "FARGATE"
-      
       ContainerDefinitions: 
         - 
-          Name: "my-app"
+          Name: 
+            Ref: "AppName"
           MountPoints: 
             - 
               SourceVolume: "my-vol"
               ContainerPath: "/var/www/my-vol"
           Image: "amazon/amazon-ecs-sample"
-          Cpu: 256
+          Cpu: "10"
+          PortMappings: 
+            - 
+              ContainerPort: 80
+#                Ref: "AppContainerPort"
+              HostPort: 80
+#                Ref: "AppHostPort"
           EntryPoint: 
             - "/usr/sbin/apache2"
             - "-D"
             - "FOREGROUND"
-          Memory: 512
-          #NetworkMode: awsvpc
-          #Essential: true
+          Memory: "0.5GB"
+          Essential: true
         - 
           Name: "busybox"
           Image: "busybox"
-          Cpu: 256
+          Cpu: "10"
           EntryPoint: 
             - "sh"
             - "-c"
-          Memory: 512
+          Memory: "0.5GB"
           Command: 
             - "/bin/sh -c \"while true; do /bin/date > /var/www/my-vol/date; sleep 1; done\""
-          #Essential: false
-          DependsOn:
-            - ContainerName: my-app
-              Condition: START
+          Essential: false
           VolumesFrom: 
             - 
-              SourceContainer: "my-app"
+              SourceContainer: 
+                Ref: "AppName"
       Volumes: 
         - 
           Host: 
             SourcePath: "/var/lib/docker/vfs/dir/"
           Name: "my-vol"
+  # TaskDefinition:
+  #   Type: AWS::ECS::TaskDefinition
+  #   Properties: 
+  #     RequiresCompatibilities:
+  #       - "FARGATE"
+      
+  #     ContainerDefinitions: 
+  #       - 
+  #         Name: "my-app"
+  #         MountPoints: 
+  #           - 
+  #             SourceVolume: "my-vol"
+  #             ContainerPath: "/var/www/my-vol"
+  #         Image: "amazon/amazon-ecs-sample"
+  #         Cpu: 256
+  #         EntryPoint: 
+  #           - "/usr/sbin/apache2"
+  #           - "-D"
+  #           - "FOREGROUND"
+  #         Memory: 512
+  #         #NetworkMode: awsvpc
+  #         Essential: true
+      #   - 
+      #     Name: "busybox"
+      #     Image: "busybox"
+      #     Cpu: 256
+      #     EntryPoint: 
+      #       - "sh"
+      #       - "-c"
+      #     Memory: 512
+      #     Command: 
+      #       - "/bin/sh -c \"while true; do /bin/date > /var/www/my-vol/date; sleep 1; done\""
+      #     #Essential: false
+      #     DependsOn:
+      #       - ContainerName: my-app
+      #         Condition: START
+      #     VolumesFrom: 
+      #       - 
+      #         SourceContainer: "my-app"
+      # Volumes: 
+      #   - 
+      #     Host: 
+      #       SourcePath: "/var/lib/docker/vfs/dir/"
+      #     Name: "my-vol"
 
 
 
@@ -221,7 +266,7 @@ Resources:
         Fn::Sub: "${AppName}-${AppEnvironmentName}-ECSService"
       #!Join ['-', [!Ref Stage, !Ref 'AWS::AccountId', 'ECSService']]
       Cluster: !Ref Cluster
-      TaskDefinition: !Ref TaskDefinition
+      #TaskDefinition: !Ref TaskDefinition
       DesiredCount: 2
       LaunchType: FARGATE
       NetworkConfiguration: 
