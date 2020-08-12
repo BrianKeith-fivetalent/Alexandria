@@ -17,7 +17,7 @@ Description: The CloudFormation template for the Fargate ECS Cluster.
 
 Parameters:
   AppName:
-    Description: Name of The App (this will be used for all recource)
+    Description: Name of The App (this will be used for all resources)
     Type: String
     MinLength: '1'
     MaxLength: '100'
