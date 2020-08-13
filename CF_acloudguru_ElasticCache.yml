@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "ElasticCache Resources"
+# ----------------------------------------------------------------------------------------
+# - Author: Brian Keith
+# - Date: 13 AUG 2020
+# - Name: CF_acloudguru_ElasticCache.yml
+# - Title: IAM Security Roles
+# - Version: 0.1
+# - Purpose: creates ElaticCache resources 
+# -
+# ----------------------------------------------------------------------------------------- 
+
+Parameters:
+  VpcId1:
+    Type: AWS::EC2::VPC::Id
+    Description: Select a VPC that allows instances access to the Internet..
+
+Resources:
+  sgdefault:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: default VPC security group
+      VpcId:
+        Ref!: VpcId1
+  cacheacgexternalsiteproduction0001003:
+    Type: AWS::ElastiCache::CacheCluster
+    Properties:
+      AutoMinorVersionUpgrade: 'true'
+      AZMode: single-az
+      CacheNodeType: cache.r4.large
+      Engine: redis
+      EngineVersion: 5.0.6
+      NumCacheNodes: '1'
+      PreferredAvailabilityZone: us-west-2a
+      PreferredMaintenanceWindow: fri:08:30-fri:09:30
+      CacheSubnetGroupName: acg-redis-production
+      VpcSecurityGroupIds:
+      - Fn::GetAtt:
+        - sgdefault
+        - GroupId
+  cacheacgexternalsiteproduction0001001:
+    Type: AWS::ElastiCache::CacheCluster
+    Properties:
+      AutoMinorVersionUpgrade: 'true'
+      AZMode: single-az
+      CacheNodeType: cache.r4.large
+      Engine: redis
+      EngineVersion: 5.0.6
+      NumCacheNodes: '1'
+      PreferredAvailabilityZone: us-west-2b
+      PreferredMaintenanceWindow: fri:08:30-fri:09:30
+      CacheSubnetGroupName: acg-redis-production
+      VpcSecurityGroupIds:
+      - Fn::GetAtt:
+        - sgdefault
+        - GroupId
+
+  cacheacgexternalsiteproduction0001002:
+    Type: AWS::ElastiCache::CacheCluster
+    Properties:
+      AutoMinorVersionUpgrade: 'true'
+      AZMode: single-az
+      CacheNodeType: cache.r4.large
+      Engine: redis
+      EngineVersion: 5.0.6
+      NumCacheNodes: '1'
+      PreferredAvailabilityZone: us-west-2a
+      PreferredMaintenanceWindow: fri:08:30-fri:09:30
+      CacheSubnetGroupName: acg-redis-production
+      VpcSecurityGroupIds:
+      - Fn::GetAtt:
+        - sgdefault
+        - GroupId
+

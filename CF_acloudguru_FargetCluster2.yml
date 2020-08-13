@@ -18,7 +18,7 @@ Parameters:
   SubnetId:
     Type: AWS::EC2::Subnet::Id
     Description: Select at two subnets in your selected VPC.
-  VpcId:
+  VpcId1:
     Type: AWS::EC2::VPC::Id
     Description: Select a VPC that allows instances access to the Internet.
   pStageCPU:
@@ -74,7 +74,7 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
-      VpcId: !Ref VpcId
+      VpcId: !Ref VpcId1
 #ecs Task for Prod
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition

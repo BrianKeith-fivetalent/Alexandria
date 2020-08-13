@@ -106,6 +106,7 @@ Resources:
             - Options
             - Host
             Cookies:
+              QueryString: true
               Forward: whitelist
               WhiteListedNames:
               - PHPSESSID
@@ -120,10 +121,10 @@ Resources:
         Origins:
         - DomainName: fg-acg-staging-web-lb-1248318125.us-west-2.elb.amazonaws.com
           Id: ELB-fg-acg-staging-web-lb-1248318125
-          S3OriginConfig:
-            HTTPPort: '80'
-            HTTPSPort: '443'
-            OriginProtocolPolicy: https-only
+          # S3OriginConfig:
+          #   HTTPPort: '80'
+          #   HTTPSPort: '443'
+          #   OriginProtocolPolicy: https-only
         Restrictions:
           GeoRestriction:
             RestrictionType: none
@@ -224,6 +225,7 @@ Resources:
             - Options
             - Host
             Cookies:
+              QueryString: true
               Forward: whitelist
               WhiteListedNames:
               - PHPSESSID
