@@ -1,24 +1,61 @@
 AWSTemplateFormatVersion: "2010-09-09"
+Description: The CloudFormation template for the Fargate ECS Cluster.
+# ----------------------------------------------------------------------------------------
+# - Author: Brian Keith
+# - Date: 12 AUG 2020
+# - Name: CF_acloudguru_FargetCluster2.yml
+# - Title: Fargate
+# - Version: 0.1
+# - Purpose: Creates an ecs Fargate Cluster
+# -
+# - ASSUMPTIONS: Run the following first
+# -         CF_acloudguru_IAM.yml
+# -         CF_acloudguru_network.yml
+# -         CF_acloudguru_CICD.yml
+# - 
+# ----------------------------------------------------------------------------------------- 
 Parameters:
-  SubnetID:
+  SubnetId:
     Type: AWS::EC2::Subnet::Id
-    Description: Select a subnet in your selected VPC.
+    Description: Select at two subnets in your selected VPC.
   VpcId:
     Type: AWS::EC2::VPC::Id
     Description: Select a VPC that allows instances access to the Internet.
+  pStageCPU:
+    Type: Number
+    Description: CPU value for the stage ecs FarGate cluster
+    Default: 2048
+  pStageMem:
+    Type: Number
+    Description: Mem value for the stage ecs FarGate cluster
+    Default: 4096
+  pProdCPU:
+    Type: Number
+    Description: CPU value for the stage ecs FarGate cluster
+    Default: 2048
+  pProdMem:
+    Type: Number
+    Description: Mem value for the stage ecs FarGate cluster
+    Default: 4096
+
+
 Resources:
-  Cluster:
+  ClusterProd:
     Type: AWS::ECS::Cluster
     Properties:
-      ClusterName: deployment-example-cluster
+      ClusterName: fg-acg-external-web-prod
+  ClusterStage:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: fg-acg-external-web-staging
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: deployment-example-log-group
+      LogGroupName: acloudguruloggroup 
   ExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: deployment-example-role
+      RoleName: fargate-execution-role
       AssumeRolePolicyDocument:
         Statement:
           - Effect: Allow
@@ -27,10 +64,10 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
-  ContainerSecurityGroup2:
+  ContainerSecurityGroup3:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: ContainerSecurityGroup2
+      GroupName: ContainerSecurityGroup3
       GroupDescription: Security group for NGINX container
       SecurityGroupIngress:
         - IpProtocol: tcp
@@ -38,12 +75,13 @@ Resources:
           ToPort: 80
           CidrIp: 0.0.0.0/0
       VpcId: !Ref VpcId
+#ecs Task for Prod
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
       Family: deployment-example-task
-      Cpu: 256
-      Memory: 512
+      Cpu: !Ref pProdCPU
+      Memory: !Ref pProdMem
       NetworkMode: awsvpc
       ExecutionRoleArn: !Ref ExecutionRole
       ContainerDefinitions:
@@ -60,18 +98,59 @@ Resources:
       RequiresCompatibilities:
         - EC2
         - FARGATE
-  Service:
+#ecs Task for stage
+  TaskDefinitionStage01:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: fg-acg-externalsite-web
+      Cpu: !Ref pStageCPU
+      Memory: !Ref pStageMem
+      NetworkMode: awsvpc
+      ExecutionRoleArn: !Ref ExecutionRole
+      ContainerDefinitions:
+        - Name: fg_acg_externalsite_web
+          Image: 770822739552.dkr.ecr.us-west-2.amazonaws.com/fg_acg_externalsite_web:latest
+          PortMappings:
+            - ContainerPort: 80
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-region: !Ref AWS::Region
+              awslogs-group: !Ref LogGroup
+              awslogs-stream-prefix: ecs
+      RequiresCompatibilities:
+        - EC2
+        - FARGATE
+#Service for Prod Cluster
+  ServiceProd:
     Type: AWS::ECS::Service
     Properties:
-      ServiceName: deployment-example-service
-      Cluster: !Ref Cluster
+      ServiceName: fg-acg-production-service
+      Cluster: !Ref ClusterProd
       TaskDefinition: !Ref TaskDefinition
-      DesiredCount: 1
+      DesiredCount: 2
       LaunchType: FARGATE
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
           Subnets:
-            - !Ref SubnetID
+            - !Ref SubnetId
           SecurityGroups:
-            - !GetAtt ContainerSecurityGroup2.GroupId
+            - !GetAtt ContainerSecurityGroup3.GroupId
+
+#Service for Staging Cluster
+  ServiceWeb:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: fg-acg-externalsite-web
+      Cluster: !Ref ClusterStage
+      TaskDefinition: !Ref TaskDefinitionStage01
+      DesiredCount: 2
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets:
+            - !Ref SubnetId
+          SecurityGroups:
+            - !GetAtt ContainerSecurityGroup3.GroupId
